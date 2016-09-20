@@ -4,11 +4,17 @@ import org.vu.contest.ContestSubmission;
 import java.util.Properties;
 import java.util.Random;
 
+//import org.vu.contest.team17.Population;
+
+
+
 public class player17 implements ContestSubmission
 {
     Random rnd_;
     ContestEvaluation evaluation_;
     private int evaluations_limit_;
+    final private int population_limit = 50;
+    final private int individual_size = 10;
 
     public player17()
     {
@@ -46,15 +52,25 @@ public class player17 implements ContestSubmission
 
     public void run()
     {
+        class Population{
+            double pop[][] = new double[10][100];
+            public void print() {
+                System.out.println(pop);
+            }
+        }
+
         // Run your algorithm here
 
         int evals = 0;
         // init population
-        // calculate fitness
+        Population pop = new Population();
+        pop.print();
+//         calculate fitness
+
         while(evals<evaluations_limit_){
             // Select parents
             // Apply crossover / mutation operators
-            double child[] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
+            double child[] = {1,1,1,1,1,1,1,1,1,1};
             // Check fitness of unknown fuction
             Double fitness = (double) evaluation_.evaluate(child);
             evals++;
@@ -62,4 +78,10 @@ public class player17 implements ContestSubmission
         }
 
     }
+
+
+
+
+
+
 }
