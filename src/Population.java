@@ -1,5 +1,3 @@
-package org.vu.contest.team17;
-
 class Population {
     player17.Individual[] population;
 
