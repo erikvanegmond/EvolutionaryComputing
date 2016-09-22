@@ -56,7 +56,7 @@ public class player17 implements ContestSubmission
 
         int evals = 0;
         // init population
-        Population pop = new Population();
+        Population pop = new Population(population_limit);
 
 //         calculate fitness
 

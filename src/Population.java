@@ -1,11 +1,11 @@
 class Population {
-    player17.Individual[] population;
 
+    Individual[] population;
     public Population(int populationSize) {
-        this.population = new player17.Individual[populationSize];
+        this.population = new Individual[populationSize];
 
         for(int individuCounter = 0; individuCounter < populationSize; individuCounter++){
-            System.out.println(this.population[individuCounter]);
+            System.out.println(individuCounter);
         }
     }
 }
