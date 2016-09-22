@@ -52,19 +52,12 @@ public class player17 implements ContestSubmission
 
     public void run()
     {
-        class Population{
-            double pop[][] = new double[10][100];
-            public void print() {
-                System.out.println(pop);
-            }
-        }
-
         // Run your algorithm here
 
         int evals = 0;
         // init population
         Population pop = new Population();
-        pop.print();
+
 //         calculate fitness
 
         while(evals<evaluations_limit_){
