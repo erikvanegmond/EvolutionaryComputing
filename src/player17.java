@@ -57,10 +57,21 @@ public class player17 implements ContestSubmission
         int evals = 0;
         // init population
         Population pop = new Population(population_limit);
+        while(pop.hasNext()){
+            Individual creature = pop.next();
+            Double fitness = (double) evaluation_.evaluate(creature.getGenome());
+            creature.setFitness(fitness);
+        }
+        pop.reset();
+        while(pop.hasNext()){
+            Individual creature = pop.next();
+            System.out.println(creature);
+        }
 
 //         calculate fitness
 
         while(evals<evaluations_limit_){
+            System.out.println(evals);
             // Select parents
             // Apply crossover / mutation operators
             double child[] = {1,1,1,1,1,1,1,1,1,1};
