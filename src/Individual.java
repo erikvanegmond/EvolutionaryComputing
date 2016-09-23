@@ -4,10 +4,12 @@ import java.util.Random;
 /**
  * Created by erikv on 14-9-2016.
  */
-public class Individual {
+public class Individual implements Comparable<Individual>{
 
     private double[] genome;
-    private double fitness = 0;
+    private Double fitness = Double.MIN_VALUE;
+    private double min = -50;
+    private double max = 50;
 
     public Individual(int genomeSize){
         this.genome = new double[genomeSize];
@@ -16,6 +18,10 @@ public class Individual {
         for(int i = 0; i<genomeSize; i++){
             this.genome[i] = rand.nextInt(100)-50;
         }
+    }
+
+    public Individual(double[] genome){
+        this.genome = genome;
     }
 
     public double getFitness() {
@@ -32,5 +38,30 @@ public class Individual {
 
     public double[] getGenome() {
         return genome;
+    }
+
+    public boolean hasScore(){
+        if(fitness != Double.MIN_VALUE){
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public int compareTo(Individual other) {
+        double otherFitness = other.getFitness();
+        return (int) (otherFitness - getFitness());
+    }
+
+    public void mutate() {
+        Random rand = new Random();
+        int randomIndex = rand.nextInt(genome.length);
+        genome[randomIndex] += (rand.nextInt(10)-20);
+        if(genome[randomIndex] < -50){
+            genome[randomIndex] = -50;
+        }else if(genome[randomIndex] > 50){
+            genome[randomIndex] = 50;
+        }
+
     }
 }
