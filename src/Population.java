@@ -3,6 +3,7 @@ import org.vu.contest.ContestEvaluation;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.Random;
 
 class Population implements Iterator<Individual>{
 
@@ -114,9 +115,18 @@ class Population implements Iterator<Individual>{
     }
 
     private Individual[] getParents(int numParents){
-        //simply get the best numParents individuals.
+        // tournament selection: to select one individual, T (in this case 7) individuals are uniformly chosen, and the
+        // best of these T is returned (from the paper Evolutionary Computing by mr Eiben)
         Arrays.sort(population);
         return  Arrays.copyOfRange(population, 0, numParents);
+        return  ;
+    }
+
+    private Individual[] tournament{
+        // get 7 random indexes and compare the individuals. Take the best inidividual from the sample and call it parent 1
+        // get 7 new indexes and use the ones that are not the same as the index of p1. Again, compare them and use the best
+        // and call it parent2
+        return
     }
 
     private Individual generateOffspring(Individual[] parents){
