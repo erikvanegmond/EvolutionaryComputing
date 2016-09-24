@@ -5,9 +5,9 @@ import java.util.Random;
  * Created by erikv on 14-9-2016.
  */
 public class Individual implements Comparable<Individual>{
-
+    private final Double minDouble = -Double.MAX_VALUE;
     private double[] genome;
-    private Double fitness = Double.MIN_VALUE;
+    private Double fitness = minDouble;
     private double min = -50;
     private double max = 50;
 
@@ -41,7 +41,7 @@ public class Individual implements Comparable<Individual>{
     }
 
     public boolean hasScore(){
-        if(fitness != Double.MIN_VALUE){
+        if(fitness != minDouble){
             return true;
         }
         return false;
@@ -54,9 +54,16 @@ public class Individual implements Comparable<Individual>{
     }
 
     public void mutate() {
+        //TODO improve mutate function
+
         Random rand = new Random();
+        //Gat an allele;
         int randomIndex = rand.nextInt(genome.length);
-        genome[randomIndex] += (rand.nextInt(10)-20);
+
+        //mutate the allele
+        genome[randomIndex] += (rand.nextInt(20)-10);
+
+        //Stay within the search range.
         if(genome[randomIndex] < -50){
             genome[randomIndex] = -50;
         }else if(genome[randomIndex] > 50){

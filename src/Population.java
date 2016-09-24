@@ -1,9 +1,8 @@
+import org.vu.contest.ContestEvaluation;
+
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
-import java.util.Properties;
-
-import org.vu.contest.ContestEvaluation;
 
 class Population implements Iterator<Individual>{
 
@@ -12,7 +11,8 @@ class Population implements Iterator<Individual>{
     ContestEvaluation evaluation_;
     private int evaluations_limit_;
     private int evals = 0;
-    private int index;
+    private int index = 0;
+    public String parentSelector = "best";
 
 
     public Population(int populationSize, int evaluations_limit_, ContestEvaluation evaluation) {
@@ -37,7 +37,7 @@ class Population implements Iterator<Individual>{
     @Override
     public Individual next() {
         if(index < this.populationSize) {
-            Individual result = this.population[index];
+            Individual result = population[index];
             index++;
             return result;
         }else{
@@ -57,13 +57,13 @@ class Population implements Iterator<Individual>{
     }
 
     public void evaluate() {
-        double maxFitness = -Integer.MIN_VALUE;
+        double maxFitness = Integer.MIN_VALUE;
         reset();
-        while(this.hasNext()){
-            Individual individual = this.next();
-            Double fitness = null;
+        while(hasNext()){
+            Individual individual = next();
+            Double fitness = -Double.MAX_VALUE;
             try {
-                fitness = this.evaluateIndividual(individual);
+                fitness = evaluateIndividual(individual);
                 if(fitness > maxFitness){
                     maxFitness = fitness;
                 }
@@ -96,13 +96,17 @@ class Population implements Iterator<Individual>{
     }
 
     public void newGeneration() {
+        //TODO Maybe more children from more couples
         // Select parents
         Individual[] parents = getParents(2);
         // Apply crossover / mutation operators -> Create offspring
         Individual child = generateOffspring(parents);
+
+        //TODO compbine old populations with new offspring
         Arrays.sort(population);
         //overwriting the worst individual
         population[populationSize-1] = child;
+
         // Evaluate population
         evaluate();
         // Kill
@@ -116,7 +120,11 @@ class Population implements Iterator<Individual>{
     }
 
     private Individual generateOffspring(Individual[] parents){
+        //TODO add crossover
+
+        //take the first parent and clone;
         Individual child = new Individual(parents[0].getGenome());
+
         child.mutate();
         return child;
     }
