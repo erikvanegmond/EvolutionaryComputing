@@ -4,6 +4,9 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Random;
+import java.util.Collections;
+import java.util.List;
+import java.util.LinkedList;
 
 class Population implements Iterator<Individual>{
 
@@ -13,6 +16,7 @@ class Population implements Iterator<Individual>{
     private int evaluations_limit_;
     private int evals = 0;
     private int index = 0;
+    private int tounamentSampleSize = 7;
     public String parentSelector = "best";
 
 
@@ -115,18 +119,48 @@ class Population implements Iterator<Individual>{
     }
 
     private Individual[] getParents(int numParents){
-        // tournament selection: to select one individual, T (in this case 7) individuals are uniformly chosen, and the
-        // best of these T is returned (from the paper Evolutionary Computing by mr Eiben)
-        Arrays.sort(population);
-        return  Arrays.copyOfRange(population, 0, numParents);
-        return  ;
+        Individual[] parents = tournament();
+        return  parents;
     }
 
-    private Individual[] tournament{
-        // get 7 random indexes and compare the individuals. Take the best inidividual from the sample and call it parent 1
-        // get 7 new indexes and use the ones that are not the same as the index of p1. Again, compare them and use the best
-        // and call it parent2
-        return
+    private Individual[] tournament(){
+        // tournament selection: to select one individual, T (in this case tournamentSampleSize) individuals are uniformly
+        // chosen, and the best of these T is returned (from the paper Evolutionary Computing by mr Eiben)
+        List<Integer> populationRange = range(0, populationSize-1);
+        Collections.shuffle(populationRange);
+        List<Integer> sample1 = populationRange.subList(0, tounamentSampleSize);
+        Collections.shuffle(populationRange);
+        List<Integer> sample2 = populationRange.subList(0, tounamentSampleSize);
+        int parentIndex1 = selectBestParent(sample1);
+        int parentIndex2 = selectBestParent(sample2);
+        Individual[] parents = {population[parentIndex1], population[parentIndex2]};
+        return parents;
+    }
+
+    private int selectBestParent(List<Integer> indexSample){
+        int bestIndividualIndex = -1;
+        for (int indexCounter = 0; indexCounter < tounamentSampleSize; indexCounter++) {
+            double bestFitness = -Double.MAX_VALUE;
+            int indexFromSample = indexSample.get(indexCounter);
+            double individualFitness = population[indexFromSample].getFitness();
+            if (individualFitness > bestFitness){
+                bestFitness = individualFitness;
+                bestIndividualIndex = indexCounter;
+            }
+            else{
+                continue;
+            }
+        }
+        return bestIndividualIndex;
+    }
+
+    public static List<Integer> range(int min, int max) {
+        List<Integer> list = new LinkedList<Integer>();
+        for (int i = min; i <= max; i++) {
+            list.add(i);
+        }
+
+        return list;
     }
 
     private Individual generateOffspring(Individual[] parents){
