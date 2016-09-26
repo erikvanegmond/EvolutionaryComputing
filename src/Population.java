@@ -11,7 +11,9 @@ class Population implements Iterator<Individual>{
     private int evals = 0;
     private int index = 0;
     private int tounamentSampleSize = 8;
-    public String parentSelector = "best";
+    private String parentSelector = "best";
+    private String typeCrossOver = "blend";
+    private double alphaBlend = 0.4;
 
 
     public Population(int populationSize, int evaluations_limit_, ContestEvaluation evaluation) {
@@ -205,19 +207,17 @@ class Population implements Iterator<Individual>{
 
     private Individual generateOffspring(Individual[] parents){
         //Generate offspring based on uniform crossover
-
         if(parents != null) {
-            Random rand = new Random();
-            int n_parents = parents.length;
-            int genome_lenght = parents[0].getGenome().length;
-            double[] child_genome = new double[genome_lenght];
-            for(int i=0; i<genome_lenght; i++){
-                int random_parent = rand.nextInt(n_parents);
-                child_genome[i] = parents[random_parent].getGenome()[i];
+            int nParents = parents.length;
+            int genomeLenght = parents[0].getGenome().length;
+            double[] childGenome = new double[genomeLenght];
+            switch (typeCrossOver) {
+                case "uniform":
+                    childGenome = uniformCrossOver(parents, childGenome, nParents, genomeLenght);
+                case "blend":
+                    childGenome = blendCrossOver(parents, childGenome, nParents, genomeLenght);
             }
-
-            Individual child = new Individual(child_genome);
-
+            Individual child = new Individual(childGenome);
             child.mutate();
             return child;
         }else{
@@ -225,5 +225,46 @@ class Population implements Iterator<Individual>{
         }
     }
 
+    private double[] uniformCrossOver(Individual[] parents, double[] childGenome, int nParents, int genomeLenght){
+        Random rand = new Random();
+        for(int i=0; i<genomeLenght; i++){
+            int randomParent = rand.nextInt(nParents);
+            childGenome[i] = parents[randomParent].getGenome()[i];
+        }
+        return childGenome;
+    }
+
+    private double[] blendCrossOver(Individual[] parents, double[] childGenome, int nParents, int genomeLenght){
+        // create new gene out of random sample in the range between genes parents
+        double biggestGene = -Double.MAX_VALUE;
+        double smallestGene = Double.MAX_VALUE;
+        Random rand = new Random();
+        // loop over the genomes of the parents and determine per gene which one is the lowest
+        // and which one is the highest gene value, so they can be used in the blending for the
+        // gene of the child
+        for(int i=0; i<genomeLenght; i++){
+            for(int j=0; j<nParents; j++){
+                double gene = parents[j].getGenome()[i];
+                if (gene>biggestGene) {
+                    biggestGene = gene;
+                }
+                if (gene<smallestGene) {
+                    smallestGene = gene;
+                }
+                else {
+                    continue;
+                }
+            }
+            double d = biggestGene-smallestGene;
+            double lowerBound = smallestGene - (alphaBlend * d) ;
+            double upperBound = biggestGene + (alphaBlend * d) ;
+            double randomDouble = rand.nextDouble();
+            // generating a random double between lowerBound and the upperBound
+            childGenome[i] = lowerBound + ((upperBound - lowerBound) * randomDouble);
+        }
+        return childGenome;
+    }
+
 }
+
 
