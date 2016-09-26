@@ -10,7 +10,7 @@ class Population implements Iterator<Individual>{
     private int evaluations_limit_;
     private int evals = 0;
     private int index = 0;
-    private int tounamentSampleSize = 1;
+    private int tounamentSampleSize = 8;
     public String parentSelector = "best";
 
 
@@ -106,10 +106,9 @@ class Population implements Iterator<Individual>{
         // Apply crossover / mutation operators -> Create offspring
         Individual child = generateOffspring(parents);
 
-        //TODO compbine old populations with new offspring
-        Arrays.sort(population);
-        //overwriting the worst individual
-        population[populationSize-1] = child;
+        //Replace the person who has lost in the tournament with the child
+        int indexDying = tournamentDying();
+        population[indexDying] = child;
 
         // Evaluate population
         evaluate();
@@ -118,43 +117,81 @@ class Population implements Iterator<Individual>{
     }
 
     private Individual[] getParents(int numParents){
-        Individual[] parents = tournament();
+        Individual[] parents = tournamentParents();
         return  parents;
     }
 
-    private Individual[] tournament(){
+    private Individual[] tournamentParents(){
         // tournament selection: to select one individual, T (in this case tournamentSampleSize) individuals are uniformly
         // chosen, and the best of these T is returned (from the paper Evolutionary Computing by mr Eiben)
+        double initialFitness = -Double.MAX_VALUE;
+
+        // Find the index for the first parent
         List<Integer> populationRange = range(0, populationSize-1);
-        Collections.shuffle(populationRange);
-        List<Integer> sample1 = populationRange.subList(0, tounamentSampleSize);
-        Collections.shuffle(populationRange);
-        List<Integer> sample2 = populationRange.subList(0, tounamentSampleSize);
-        int parentIndex1 = selectBestParent(sample1);
-        int parentIndex2 = selectBestParent(sample2);
+        List<Integer> sample1 = sample(populationRange);
+        int parentIndex1 = selectIndividualForTournament(sample1, "best", initialFitness);
+
+        // Remove first parent from list of possibilities
+        Collections.sort(populationRange);
+        populationRange.remove(parentIndex1);
+
+        // Find the index for the second parent
+        List<Integer> sample2 = sample(populationRange);
+        int parentIndex2 = selectIndividualForTournament(sample2, "best", initialFitness);
+
         Individual[] parents = {population[parentIndex1], population[parentIndex2]};
         return parents;
     }
 
-    private int selectBestParent(List<Integer> indexSample){
-        int bestIndividualIndex = -1;
+    private int tournamentDying(){
+        // tournament selection: to select one individual, T (in this case tournamentSampleSize) individuals are uniformly
+        // chosen, and the best of these T is returned (from the paper Evolutionary Computing by mr Eiben)
+
+        double initialFitness = Double.MAX_VALUE;
+
+        // Find the index for the one who will be dying
+        List<Integer> populationRange = range(0, populationSize-1);
+        List<Integer> sample1 = sample(populationRange);
+        int dyingIndex = selectIndividualForTournament(sample1, "worst", initialFitness);
+
+        return dyingIndex;
+    }
+
+    private List<Integer> sample(List<Integer> listForSample){
+        Collections.shuffle(listForSample);
+        List<Integer> sample = listForSample.subList(0, tounamentSampleSize);
+        return sample;
+    }
+
+    private int selectIndividualForTournament(List<Integer> indexSample, String tournamentType, double fitnessBestFit){
+        int individualIndex = -1;
         for (int indexCounter = 0; indexCounter < tounamentSampleSize; indexCounter++) {
-            double bestFitness = -Double.MAX_VALUE;
             int indexFromSample = indexSample.get(indexCounter);
             double individualFitness = population[indexFromSample].getFitness();
-            if (individualFitness > bestFitness){
-                bestFitness = individualFitness;
-                bestIndividualIndex = indexCounter;
+            if (tournamentType.equals("best")) {
+                if (individualFitness > fitnessBestFit) {
+                    fitnessBestFit = individualFitness;
+                    individualIndex = indexFromSample;
+                } else {
+                    continue;
+                }
+            }
+            else if (tournamentType.equals("worst")){
+                if (individualFitness < fitnessBestFit) {
+                    fitnessBestFit = individualFitness;
+                    individualIndex = indexFromSample;
+                } else {
+                    continue;
+                }
             }
             else{
-                continue;
+                System.out.println("not a known tournamentType");
             }
         }
-
         if(evals%100==0) {
-            System.out.println(population[bestIndividualIndex].getFitness());
+            System.out.println(population[individualIndex].getFitness());
         }
-        return bestIndividualIndex;
+        return individualIndex;
     }
 
     public static List<Integer> range(int min, int max) {
