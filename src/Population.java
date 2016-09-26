@@ -10,7 +10,7 @@ class Population implements Iterator<Individual>{
     private int evaluations_limit_;
     private int evals = 0;
     private int index = 0;
-    private int tounamentSampleSize = 7;
+    private int tounamentSampleSize = 1;
     public String parentSelector = "best";
 
 
@@ -73,7 +73,10 @@ class Population implements Iterator<Individual>{
             }
             individual.setFitness(fitness);
         }
-        System.out.println(bestIndividual);
+        if(evals%100==0) {
+            System.out.print(evals + " ");
+            System.out.println(bestIndividual);
+        }
     }
 
     public double evaluateIndividual(Individual individual) throws TooManyEvalsException {
@@ -146,6 +149,10 @@ class Population implements Iterator<Individual>{
             else{
                 continue;
             }
+        }
+
+        if(evals%100==0) {
+            System.out.println(population[bestIndividualIndex].getFitness());
         }
         return bestIndividualIndex;
     }

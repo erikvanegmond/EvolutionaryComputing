@@ -8,8 +8,8 @@ public class Individual implements Comparable<Individual>{
     private final Double minDouble = -Double.MAX_VALUE;
     private double[] genome;
     private Double fitness = minDouble;
-    private double min = -50;
-    private double max = 50;
+    private double min = 0;
+    private double max = 10;
 
     public Individual(int genomeSize){
         this.genome = new double[genomeSize];
@@ -61,10 +61,10 @@ public class Individual implements Comparable<Individual>{
             if (rand.nextDouble() > 0.8){
                 genome[i] += rand.nextGaussian();
                 //Stay within the search range.
-                if(genome[i] < -50){
-                    genome[i] = -50;
-                }else if(genome[i] > 50){
-                    genome[i] = 50;
+                if(genome[i] < min){
+                    genome[i] = min;
+                }else if(genome[i] > max){
+                    genome[i] = max;
                 }
 
             }

@@ -58,6 +58,7 @@ public class player17 implements ContestSubmission
         //evaluate entire population
         pop.evaluate();
 
+
         while(pop.canEvaluate()){
             pop.newGeneration();
         }
