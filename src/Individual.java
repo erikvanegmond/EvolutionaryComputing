@@ -16,7 +16,7 @@ public class Individual implements Comparable<Individual>{
 
         Random rand = new Random();
         for(int i = 0; i<genomeSize; i++){
-            this.genome[i] = rand.nextInt(100)-50;
+            this.genome[i] = min + (rand.nextDouble() * ((max - min) + 1));
         }
     }
 
@@ -57,18 +57,19 @@ public class Individual implements Comparable<Individual>{
         //TODO improve mutate function
 
         Random rand = new Random();
-        //Gat an allele;
-        int randomIndex = rand.nextInt(genome.length);
+        for(int i=0; i < genome.length; i++){
+            if (rand.nextDouble() > 0.8){
+                genome[i] += rand.nextGaussian();
+                //Stay within the search range.
+                if(genome[i] < -50){
+                    genome[i] = -50;
+                }else if(genome[i] > 50){
+                    genome[i] = 50;
+                }
 
-        //mutate the allele
-        genome[randomIndex] += (rand.nextInt(20)-10);
-
-        //Stay within the search range.
-        if(genome[randomIndex] < -50){
-            genome[randomIndex] = -50;
-        }else if(genome[randomIndex] > 50){
-            genome[randomIndex] = 50;
+            }
         }
 
     }
+
 }
