@@ -58,7 +58,7 @@ public class Individual implements Comparable<Individual>{
     }
 
     public void mutate(){
-        String mutation = "nonuniformMutation-uniformMutation";
+        String mutation = "nonuniformMutation";
         switch (mutation){
             case "nonuniformMutation":
                 nonuniformMutation();
