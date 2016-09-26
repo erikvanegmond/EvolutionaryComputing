@@ -12,7 +12,7 @@ class Population implements Iterator<Individual>{
     private int index = 0;
     private int tounamentSampleSize = 8;
     private String parentSelector = "best";
-    private String typeCrossOver = "blend";
+    private String typeCrossOver = "uniform";
     private double alphaBlend = 0.4;
 
 
@@ -214,8 +214,13 @@ class Population implements Iterator<Individual>{
             switch (typeCrossOver) {
                 case "uniform":
                     childGenome = uniformCrossOver(parents, childGenome, nParents, genomeLenght);
+                    break;
                 case "blend":
                     childGenome = blendCrossOver(parents, childGenome, nParents, genomeLenght);
+                    break;
+                default:
+                    childGenome = blendCrossOver(parents, childGenome, nParents, genomeLenght);
+                    break;
             }
             Individual child = new Individual(childGenome);
             child.mutate();
