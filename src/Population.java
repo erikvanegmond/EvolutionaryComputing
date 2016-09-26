@@ -73,10 +73,6 @@ class Population implements Iterator<Individual>{
             }
             individual.setFitness(fitness);
         }
-        if(evals%100==0) {
-            System.out.print(evals + " ");
-            System.out.println(bestIndividual);
-        }
     }
 
     public double evaluateIndividual(Individual individual) throws TooManyEvalsException {
@@ -187,9 +183,6 @@ class Population implements Iterator<Individual>{
             else{
                 System.out.println("not a known tournamentType");
             }
-        }
-        if(evals%100==0) {
-            System.out.println(population[individualIndex].getFitness());
         }
         return individualIndex;
     }
