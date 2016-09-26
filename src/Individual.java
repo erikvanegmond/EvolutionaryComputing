@@ -14,14 +14,18 @@ public class Individual implements Comparable<Individual>{
     public Individual(int genomeSize){
         this.genome = new double[genomeSize];
 
-        Random rand = new Random();
         for(int i = 0; i<genomeSize; i++){
-            this.genome[i] = min + (rand.nextDouble() * ((max - min) + 1));
+            this.genome[i] = newAllele();
         }
     }
 
     public Individual(double[] genome){
         this.genome = genome;
+    }
+
+    public double newAllele(){
+        Random rand = new Random();
+        return min + (rand.nextDouble() * ((max - min) + 1));
     }
 
     public double getFitness() {
@@ -53,12 +57,23 @@ public class Individual implements Comparable<Individual>{
         return (int) (otherFitness - getFitness());
     }
 
-    public void mutate() {
-        //TODO improve mutate function
+    public void mutate(){
+        String mutation = "nonuniformMutation-uniformMutation";
+        switch (mutation){
+            case "nonuniformMutation":
+                nonuniformMutation();
+            case "uniformMutation":
+                uniformMutation();
+            break;
+        }
 
+    }
+
+    public void nonuniformMutation() {
+        final double mutationChance = 0.3;
         Random rand = new Random();
         for(int i=0; i < genome.length; i++){
-            if (rand.nextDouble() > 0.8){
+            if (rand.nextDouble() < mutationChance){
                 genome[i] += rand.nextGaussian();
                 //Stay within the search range.
                 if(genome[i] < min){
@@ -69,7 +84,17 @@ public class Individual implements Comparable<Individual>{
 
             }
         }
+    }
 
+    public void uniformMutation(){
+    // can be used to get out of a local optimum
+        final double mutationChance = 0.03;
+        Random rand = new Random();
+        for(int i=0; i < genome.length; i++){
+            if (rand.nextDouble() < mutationChance){
+                genome[i] += newAllele();
+            }
+        }
     }
 
 }
