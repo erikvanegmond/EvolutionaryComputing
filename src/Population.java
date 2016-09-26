@@ -1,12 +1,6 @@
 import org.vu.contest.ContestEvaluation;
 
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.NoSuchElementException;
-import java.util.Random;
-import java.util.Collections;
-import java.util.List;
-import java.util.LinkedList;
+import java.util.*;
 
 class Population implements Iterator<Individual>{
 
@@ -63,6 +57,7 @@ class Population implements Iterator<Individual>{
 
     public void evaluate() {
         double maxFitness = Integer.MIN_VALUE;
+        Individual bestIndividual = null;
         reset();
         while(hasNext()){
             Individual individual = next();
@@ -71,26 +66,27 @@ class Population implements Iterator<Individual>{
                 fitness = evaluateIndividual(individual);
                 if(fitness > maxFitness){
                     maxFitness = fitness;
+                    bestIndividual = individual;
                 }
             } catch (TooManyEvalsException e) {
                 return;
             }
             individual.setFitness(fitness);
         }
-        System.out.println(maxFitness);
+        System.out.println(bestIndividual);
     }
 
     public double evaluateIndividual(Individual individual) throws TooManyEvalsException {
         if(!individual.hasScore()) {
             if (evals < evaluations_limit_) {
                 evals++;
-                return (double) evaluation_.evaluate(individual.getGenome());
+                double fitness = (double) evaluation_.evaluate(individual.getGenome());
+                individual.setFitness(fitness);
             } else {
                 throw new TooManyEvalsException("You did too many evaluations");
             }
-        }else{
-            return individual.getFitness();
         }
+        return individual.getFitness();
     }
 
     public boolean canEvaluate() {
@@ -164,13 +160,25 @@ class Population implements Iterator<Individual>{
     }
 
     private Individual generateOffspring(Individual[] parents){
-        //TODO add crossover
+        //Generate offspring based on uniform crossover
 
-        //take the first parent and clone;
-        Individual child = new Individual(parents[0].getGenome());
+        if(parents != null) {
+            Random rand = new Random();
+            int n_parents = parents.length;
+            int genome_lenght = parents[0].getGenome().length;
+            double[] child_genome = new double[genome_lenght];
+            for(int i=0; i<genome_lenght; i++){
+                int random_parent = rand.nextInt(n_parents);
+                child_genome[i] = parents[random_parent].getGenome()[i];
+            }
 
-        child.mutate();
-        return child;
+            Individual child = new Individual(child_genome);
+
+            child.mutate();
+            return child;
+        }else{
+            return null;
+        }
     }
 
 }
