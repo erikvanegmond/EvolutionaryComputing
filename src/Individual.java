@@ -8,6 +8,7 @@ public class Individual implements Comparable<Individual>{
     private final Double minDouble = -Double.MAX_VALUE;
     private double[] genome;
     private Double fitness = minDouble;
+    private Double sharedFitness = minDouble;
     private double min = 0;
     private double max = 10;
 
@@ -26,6 +27,14 @@ public class Individual implements Comparable<Individual>{
     public double newAllele(){
         Random rand = new Random();
         return min + (rand.nextDouble() * ((max - min) + 1));
+    }
+
+    public double getSharedFitness() {
+        return sharedFitness;
+    }
+
+    public void setSharedFitness(double sharedFitness) {
+        this.sharedFitness = sharedFitness;
     }
 
     public double getFitness() {
@@ -95,6 +104,26 @@ public class Individual implements Comparable<Individual>{
                 genome[i] += newAllele();
             }
         }
+    }
+
+    public double distance(Individual other){
+        int genome_length = this.genome.length;
+        int sum = 0;
+        for(int i=0; i<genome_length; i++){
+            double diff = Math.abs(this.genome[i] - other.getGenome()[i]);
+            sum += diff;
+        }
+        return sum;
+    }
+
+    public double distance(double[] otherGenome){
+        int genome_length = this.genome.length;
+        int sum = 0;
+        for(int i=0; i<genome_length; i++){
+            double diff = Math.abs(this.genome[i] - otherGenome[i]);
+            sum += diff;
+        }
+        return sum;
     }
 
 }

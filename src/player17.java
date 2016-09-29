@@ -15,6 +15,9 @@ public class player17 implements ContestSubmission
     private int evaluations_limit_;
     final private int population_limit = 50;
     final private int individual_size = 10;
+    private boolean isMultimodal;
+    private boolean hasStructure;
+    private boolean isSeparable;
 
     public player17()
     {
@@ -38,16 +41,11 @@ public class player17 implements ContestSubmission
         evaluations_limit_ = Integer.parseInt(props.getProperty("Evaluations"));
         // Property keys depend on specific evaluation
         // E.g. double param = Double.parseDouble(props.getProperty("property_name"));
-        boolean isMultimodal = Boolean.parseBoolean(props.getProperty("Multimodal"));
-        boolean hasStructure = Boolean.parseBoolean(props.getProperty("Regular"));
-        boolean isSeparable = Boolean.parseBoolean(props.getProperty("Separable"));
+        isMultimodal = Boolean.parseBoolean(props.getProperty("Multimodal"));
+        hasStructure = Boolean.parseBoolean(props.getProperty("Regular"));
+        isSeparable = Boolean.parseBoolean(props.getProperty("Separable"));
 
-        // Do sth with property values, e.g. specify relevant settings of your algorithm
-        if(isMultimodal){
-            // Do sth
-        }else{
-            // Do sth else
-        }
+
     }
 
     public void run()
@@ -55,8 +53,13 @@ public class player17 implements ContestSubmission
         // init population
         Population pop = new Population(population_limit, evaluations_limit_, evaluation_);
 
+
         //evaluate entire population
         pop.evaluate();
+        if(isMultimodal){
+            pop.setMultimodal(isMultimodal);
+            pop.sharedFitness();
+        }
 
 
         while(pop.canEvaluate()){
