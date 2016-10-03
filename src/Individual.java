@@ -66,11 +66,11 @@ public class Individual implements Comparable<Individual>{
         return (int) (otherFitness - getFitness());
     }
 
-    public void mutate(){
+    public void mutate(double mutationRate){
         String mutation = "nonuniformMutation";
         switch (mutation){
             case "nonuniformMutation":
-                nonuniformMutation();
+                nonuniformMutation(mutationRate);
             case "uniformMutation":
                 uniformMutation();
             break;
@@ -78,12 +78,12 @@ public class Individual implements Comparable<Individual>{
 
     }
 
-    public void nonuniformMutation() {
+    public void nonuniformMutation(double sigma) {
         final double mutationChance = 0.3;
         Random rand = new Random();
         for(int i=0; i < genome.length; i++){
             if (rand.nextDouble() < mutationChance){
-                genome[i] += rand.nextGaussian();
+                genome[i] += rand.nextGaussian()*sigma;
                 //Stay within the search range.
                 if(genome[i] < min){
                     genome[i] = min;

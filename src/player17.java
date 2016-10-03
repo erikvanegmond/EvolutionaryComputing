@@ -4,10 +4,6 @@ import org.vu.contest.ContestSubmission;
 import java.util.Properties;
 import java.util.Random;
 
-//import org.vu.contest.team17.Population;
-
-
-
 public class player17 implements ContestSubmission
 {
     Random rnd_;
@@ -63,6 +59,13 @@ public class player17 implements ContestSubmission
 
 
         while(pop.canEvaluate()){
+            if(pop.getNoChangeCounter() > 10){
+                pop.setMutationRate(pop.getMutationRate()*1.01);
+                pop.setNoChangeCounter(9);
+            }
+            if(pop.getNoChangeCounter() < 2){
+                pop.setMutationRate(1);
+            }
             pop.newGeneration();
         }
 

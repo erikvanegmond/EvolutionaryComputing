@@ -9,13 +9,44 @@ class Population implements Iterator<Individual>{
     private int populationSize;
     private int genomeSize = 10;
     private int evaluations_limit_;
+
+    public double getMutationRate() {
+        return mutationRate;
+    }
+
+    public void setMutationRate(double mutationRate) {
+        this.mutationRate = mutationRate;
+    }
+
+    private double mutationRate=1;
     private int evals = 0;
     private int index = 0;
-    private int tounamentSampleSize = 8;
+    private int tounamentSampleSize = 18;
     private boolean multimodal = false;
     private String parentSelector = "best";
-    private String typeCrossOver = "uniform";
+    private String typeCrossOver = "blend";
     private double alphaBlend = 0.4;
+    private int noChangeCounter = 0;
+
+    public int getEvals() {
+        return evals;
+    }
+
+    public void setEvals(int evals) {
+        this.evals = evals;
+    }
+
+
+
+    public int getNoChangeCounter() {
+        return noChangeCounter;
+    }
+
+    public void setNoChangeCounter(int noChangeCounter) {
+        this.noChangeCounter = noChangeCounter;
+    }
+
+    private double best = -Double.MAX_VALUE;
 
 
     public Population(int populationSize, int evaluations_limit_, ContestEvaluation evaluation) {
@@ -150,8 +181,11 @@ class Population implements Iterator<Individual>{
 
     public void newGeneration() {
         //TODO Maybe more children from more couples
-        final int num_children = 10;
+        final int num_children = 50; //this affects the nochangecounter
         Individual[] children = new Individual[num_children];
+
+
+
         for(int i=0; i< num_children; i++) {
             // Select parents
             Individual[] parents = getParents(2);
@@ -165,7 +199,15 @@ class Population implements Iterator<Individual>{
             population[indexDying] = children[i];
         }
         // Evaluate population
-//        evaluate();
+        double best = evaluate();
+        if(best > this.best){
+            this.best = best;
+            this.noChangeCounter = 0;
+        }else{
+            this.noChangeCounter++;
+        }
+//        System.out.println(best +" "+this.noChangeCounter);
+
         if (multimodal) {
             sharedFitness();
         }
@@ -267,7 +309,7 @@ class Population implements Iterator<Individual>{
                     break;
             }
             Individual child = new Individual(childGenome);
-            child.mutate();
+            child.mutate(mutationRate);
             return child;
         }else{
             return null;
