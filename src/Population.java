@@ -29,6 +29,23 @@ class Population implements Iterator<Individual>{
         }
     }
 
+    public static List<Integer> range(int min, int max) {
+        List<Integer> list = new LinkedList<Integer>();
+        for (int i = min; i <= max; i++) {
+            list.add(i);
+        }
+
+        return list;
+    }
+
+    public boolean isMultimodal() {
+        return multimodal;
+    }
+
+    public void setMultimodal(boolean multimodal) {
+        this.multimodal = false;//multimodal;
+    }
+
     @Override
     public boolean hasNext() {
         if(index < this.populationSize ){
