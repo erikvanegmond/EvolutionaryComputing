@@ -2,9 +2,8 @@ import org.vu.contest.ContestEvaluation;
 
 import java.util.*;
 
-class Population implements Iterator<Individual> {
+class Population implements Iterator<Individual>{
 
-    public String parentSelector = "best";
     Individual[] population;
     ContestEvaluation evaluation_;
     private int populationSize;
@@ -14,6 +13,10 @@ class Population implements Iterator<Individual> {
     private int index = 0;
     private int tounamentSampleSize = 8;
     private boolean multimodal = false;
+    private String parentSelector = "best";
+    private String typeCrossOver = "uniform";
+    private double alphaBlend = 0.4;
+
 
     public Population(int populationSize, int evaluations_limit_, ContestEvaluation evaluation) {
         this.populationSize = populationSize;
@@ -21,31 +24,14 @@ class Population implements Iterator<Individual> {
         this.evaluation_ = evaluation;
         this.population = new Individual[populationSize];
 
-        for (int individuCounter = 0; individuCounter < populationSize; individuCounter++) {
+        for(int individuCounter = 0; individuCounter < populationSize; individuCounter++){
             this.population[individuCounter] = new Individual(10);
         }
     }
 
-    public static List<Integer> range(int min, int max) {
-        List<Integer> list = new LinkedList<Integer>();
-        for (int i = min; i <= max; i++) {
-            list.add(i);
-        }
-
-        return list;
-    }
-
-    public boolean isMultimodal() {
-        return multimodal;
-    }
-
-    public void setMultimodal(boolean multimodal) {
-        this.multimodal = false;//multimodal;
-    }
-
     @Override
     public boolean hasNext() {
-        if (index < this.populationSize) {
+        if(index < this.populationSize ){
             return true;
         }
         return false;
@@ -53,11 +39,11 @@ class Population implements Iterator<Individual> {
 
     @Override
     public Individual next() {
-        if (index < this.populationSize) {
+        if(index < this.populationSize) {
             Individual result = population[index];
             index++;
             return result;
-        } else {
+        }else{
             NoSuchElementException e = new NoSuchElementException("Element does not exist");
             throw e;
         }
@@ -93,6 +79,7 @@ class Population implements Iterator<Individual> {
                 maxFitness = fitness;
 //                bestIndividual = individual;
             }
+            individual.setFitness(fitness);
         }
         return maxFitness;
     }
@@ -194,7 +181,7 @@ class Population implements Iterator<Individual> {
         return parents;
     }
 
-    private int tournamentDying() {
+    private int tournamentDying(){
         // tournament selection: to select one individual, T (in this case tournamentSampleSize) individuals are uniformly
         // chosen, and the best of these T is returned (from the paper Evolutionary Computing by mr Eiben)
 
@@ -247,24 +234,67 @@ class Population implements Iterator<Individual> {
 
     private Individual generateOffspring(Individual[] parents) {
         //Generate offspring based on uniform crossover
-
-        if (parents != null) {
-            Random rand = new Random();
-            int n_parents = parents.length;
-            int genome_lenght = parents[0].getGenome().length;
-            double[] child_genome = new double[genome_lenght];
-            for (int i = 0; i < genome_lenght; i++) {
-                int random_parent = rand.nextInt(n_parents);
-                child_genome[i] = parents[random_parent].getGenome()[i];
+        if(parents != null) {
+            int nParents = parents.length;
+            int genomeLenght = parents[0].getGenome().length;
+            double[] childGenome = new double[genomeLenght];
+            switch (typeCrossOver) {
+                case "uniform":
+                    childGenome = uniformCrossOver(parents, childGenome, nParents, genomeLenght);
+                    break;
+                case "blend":
+                    childGenome = blendCrossOver(parents, childGenome, nParents, genomeLenght);
+                    break;
+                default:
+                    childGenome = blendCrossOver(parents, childGenome, nParents, genomeLenght);
+                    break;
             }
-
-            Individual child = new Individual(child_genome);
-
+            Individual child = new Individual(childGenome);
             child.mutate();
             return child;
-        } else {
+        }else{
             return null;
         }
+    }
+
+    private double[] uniformCrossOver(Individual[] parents, double[] childGenome, int nParents, int genomeLenght){
+        Random rand = new Random();
+        for(int i=0; i<genomeLenght; i++){
+            int randomParent = rand.nextInt(nParents);
+            childGenome[i] = parents[randomParent].getGenome()[i];
+        }
+        return childGenome;
+    }
+
+    private double[] blendCrossOver(Individual[] parents, double[] childGenome, int nParents, int genomeLenght){
+        // create new gene out of random sample in the range between genes parents
+        double biggestGene = -Double.MAX_VALUE;
+        double smallestGene = Double.MAX_VALUE;
+        Random rand = new Random();
+        // loop over the genomes of the parents and determine per gene which one is the lowest
+        // and which one is the highest gene value, so they can be used in the blending for the
+        // gene of the child
+        for(int i=0; i<genomeLenght; i++){
+            for(int j=0; j<nParents; j++){
+                double gene = parents[j].getGenome()[i];
+                if (gene>biggestGene) {
+                    biggestGene = gene;
+                }
+                if (gene<smallestGene) {
+                    smallestGene = gene;
+                }
+                else {
+                    continue;
+                }
+            }
+            double d = biggestGene-smallestGene;
+            double lowerBound = smallestGene - (alphaBlend * d) ;
+            double upperBound = biggestGene + (alphaBlend * d) ;
+            double randomDouble = rand.nextDouble();
+            // generating a random double between lowerBound and the upperBound
+            childGenome[i] = lowerBound + ((upperBound - lowerBound) * randomDouble);
+        }
+        return childGenome;
     }
 
 }
