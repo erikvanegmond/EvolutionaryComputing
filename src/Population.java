@@ -81,7 +81,7 @@ class Population implements Iterator<Individual> {
         this.index = newIndex;
     }
 
-    public void evaluate() {
+    public double evaluate() {
         double maxFitness = Integer.MIN_VALUE;
 //        Individual bestIndividual = null;
         resetIndex();
@@ -94,6 +94,7 @@ class Population implements Iterator<Individual> {
 //                bestIndividual = individual;
             }
         }
+        return maxFitness;
     }
 
     public double evaluateIndividual(Individual individual){
@@ -164,7 +165,6 @@ class Population implements Iterator<Individual> {
         if (multimodal) {
             sharedFitness();
         }
-        sharedFitness();
     }
 
     private Individual[] getParents(int numParents) {

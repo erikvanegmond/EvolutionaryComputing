@@ -9,8 +9,8 @@ public class Individual implements Comparable<Individual>{
     private double[] genome;
     private Double fitness = minDouble;
     private Double sharedFitness = minDouble;
-    private double min = 0;
-    private double max = 10;
+    private double min = -50;
+    private double max = 50;
 
     public Individual(int genomeSize){
         this.genome = new double[genomeSize];
@@ -111,9 +111,9 @@ public class Individual implements Comparable<Individual>{
         int sum = 0;
         for(int i=0; i<genome_length; i++){
             double diff = Math.abs(this.genome[i] - other.getGenome()[i]);
-            sum += diff;
+            sum += Math.pow(diff, 2);
         }
-        return sum;
+        return Math.sqrt(sum);
     }
 
     public double distance(double[] otherGenome){
