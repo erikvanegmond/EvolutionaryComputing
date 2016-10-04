@@ -24,7 +24,7 @@ class Population implements Iterator<Individual>{
     private int tounamentSampleSize = 18;
     private boolean multimodal = false;
     private String parentSelector = "best";
-    private String typeCrossOver = "blend";
+    private String typeCrossOver = "uniform";
     private double alphaBlend = 0.4;
     private int noChangeCounter = 0;
 
