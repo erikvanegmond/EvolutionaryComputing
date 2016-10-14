@@ -1,32 +1,26 @@
 import org.vu.contest.ContestEvaluation;
 
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 
-class Population implements Iterator<Individual>{
+class DiffPopulation implements Iterator<DiffIndividual>{
 
-    Individual[] population;
+    DiffIndividual[] population;
     ContestEvaluation evaluation_;
     private int populationSize;
     private int genomeSize = 10;
     private int evaluations_limit_;
 
-    public double getMutationRate() {
-        return mutationRate;
-    }
-
-    public void setMutationRate(double mutationRate) {
-        this.mutationRate = mutationRate;
-    }
-
-    private double mutationRate=1;
     private int evals = 0;
     private int index = 0;
-    private int tounamentSampleSize = 18;
     private boolean multimodal = false;
-    private String parentSelector = "best";
-    private String typeCrossOver = "blend";
-    private double alphaBlend = 0.4;
     private int noChangeCounter = 0;
+
+    //mutationConstant [0,2]
+    private double mutationConstant = 1.5;
+    private double crossoverProbability = 0.9;
+    private String typeParentSelection = "tournament";
+    private int tournamentSampleSize = 18;
 
     public int getEvals() {
         return evals;
@@ -49,14 +43,14 @@ class Population implements Iterator<Individual>{
     private double best = -Double.MAX_VALUE;
 
 
-    public Population(int populationSize, int evaluations_limit_, ContestEvaluation evaluation) {
+    public DiffPopulation(int populationSize, int evaluations_limit_, ContestEvaluation evaluation) {
         this.populationSize = populationSize;
         this.evaluations_limit_ = evaluations_limit_;
         this.evaluation_ = evaluation;
-        this.population = new Individual[populationSize];
+        this.population = new DiffIndividual[populationSize];
 
         for(int individuCounter = 0; individuCounter < populationSize; individuCounter++){
-            this.population[individuCounter] = new Individual(10);
+            this.population[individuCounter] = new DiffIndividual(10);
         }
     }
 
@@ -86,9 +80,9 @@ class Population implements Iterator<Individual>{
     }
 
     @Override
-    public Individual next() {
+    public DiffIndividual next() {
         if(index < this.populationSize) {
-            Individual result = population[index];
+            DiffIndividual result = population[index];
             index++;
             return result;
         }else{
@@ -117,10 +111,10 @@ class Population implements Iterator<Individual>{
 
     public double evaluate() {
         double maxFitness = Integer.MIN_VALUE;
-//        Individual bestIndividual = null;
+//        DiffIndividual bestIndividual = null;
         resetIndex();
         while (hasNext()) {
-            Individual individual = next();
+            DiffIndividual individual = next();
             Double fitness = -Double.MAX_VALUE;
             fitness = evaluateIndividual(individual);
             if (fitness > maxFitness) {
@@ -132,7 +126,7 @@ class Population implements Iterator<Individual>{
         return maxFitness;
     }
 
-    public double evaluateIndividual(Individual individual){
+    public double evaluateIndividual(DiffIndividual individual){
         if (!individual.hasScore()) {
             if (evals < evaluations_limit_) {
                 evals++;
@@ -150,53 +144,55 @@ class Population implements Iterator<Individual>{
         return false;
     }
 
-    public void sharedFitness() {
-        final int sigma = 7; // sugested to be between 5 and 10. p93 Introduction to Evolutionary Computing
-        final double alpha = 1;// linear shape for the sharing function.
-
-
-        double[][] genomes = new double[populationSize][genomeSize];
-        for(int i=0; i<populationSize; i++){
-            genomes[i] = population[i].getGenome();
-        }
-
-        resetIndex();
-        Individual individual;
-        while (hasNext()) {
-            individual = next();
-
-            double sumShared = 0;
-            for(int i=0; i<populationSize; i++){
-                double[] other = genomes[i];
-                double distance = individual.distance(other);
-                if(distance <= sigma){
-                    double shared = (1 - Math.pow(distance / sigma, alpha));
-                    sumShared += shared;
-                }
-            }
-            double sharedFitness = individual.getFitness()/sumShared;
-            individual.setSharedFitness(sharedFitness);
-        }
-    }
+//    public void sharedFitness() {
+//        final int sigma = 7; // sugested to be between 5 and 10. p93 Introduction to Evolutionary Computing
+//        final double alpha = 1;// linear shape for the sharing function.
+//
+//
+//        double[][] genomes = new double[populationSize][genomeSize];
+//        for(int i=0; i<populationSize; i++){
+//            genomes[i] = population[i].getGenome();
+//        }
+//
+//        resetIndex();
+//        DiffIndividual individual;
+//        while (hasNext()) {
+//            individual = next();
+//
+//            double sumShared = 0;
+//            for(int i=0; i<populationSize; i++){
+//                double[] other = genomes[i];
+//                double distance = individual.distance(other);
+//                if(distance <= sigma){
+//                    double shared = (1 - Math.pow(distance / sigma, alpha));
+//                    sumShared += shared;
+//                }
+//            }
+//            double sharedFitness = individual.getFitness()/sumShared;
+//            individual.setSharedFitness(sharedFitness);
+//        }
+//    }
 
     public void newGeneration() {
-        //TODO Maybe more children from more couples
-        final int num_children = 50; //this affects the nochangecounter
-        Individual[] children = new Individual[num_children];
-
-
-
-        for(int i=0; i< num_children; i++) {
+        //create the new generation agent by agent
+        //each agent is adapted using Differential Evolution and then tested
+        //If it is fitter than the agent who was originally on that index, it will replace this agent
+        for(int i=0; i< populationSize; i++) {
             // Select parents
-            Individual[] parents = getParents(2);
+            DiffIndividual[] parents = getParents(i,3);
             // Apply crossover / mutation operators -> Create offspring
-            children[i] = generateOffspring(parents);
-        }
-        for(int i=0; i< num_children; i++) {
-            evaluateIndividual(children[i]);
-            //Replace the person who has lost in the tournament with the child
-            int indexDying = tournamentDying();
-            population[indexDying] = children[i];
+            DiffIndividual currentAgent = population[i];
+            DiffIndividual child = generateOffspring(currentAgent, parents);
+
+            // if fitness child higher than former current agent,
+            // replace the former current agent
+            double fitnessCurrentAgent = evaluateIndividual(currentAgent);
+            double fitnessChild = evaluateIndividual(child);
+            if(fitnessCurrentAgent <= fitnessChild){
+                population[i] = child;
+                System.out.println("better!");
+            }
+
         }
         // Evaluate population
         double best = evaluate();
@@ -206,143 +202,113 @@ class Population implements Iterator<Individual>{
         }else{
             this.noChangeCounter++;
         }
-//        System.out.println(best +" "+this.noChangeCounter);
+        System.out.println(best +" "+this.noChangeCounter);
 
-        if (multimodal) {
-            sharedFitness();
+//        if (multimodal) {
+//            sharedFitness();
+//        }
+    }
+
+    private DiffIndividual[] getParents(int currentIndividualIndex, int numParents) {
+        // randomly select 3 agents who are not eachother and not the current individual
+        // first generate list of all indexes in the population without current agent
+        List<Integer> populationRange = range(0, populationSize - 1);
+        populationRange.remove(currentIndividualIndex);
+
+        // Get a sample of the indexes of the 3 parents by using either random selection or tournament selection
+        int sampleSize = 3;
+        DiffIndividual[] parents = null;
+        switch (typeParentSelection) {
+            case "random":
+                parents = randomParentSelection(populationRange, sampleSize);
+                break;
+            case "tournament":
+                parents = tournamentParentSelection(populationRange, sampleSize);
+                System.out.println("in tournament");
+                break;
+            default:
+                parents = tournamentParentSelection(populationRange, sampleSize);
+                break;
         }
-    }
-
-    private Individual[] getParents(int numParents) {
-        Individual[] parents = tournamentParents();
         return parents;
     }
 
-    private Individual[] tournamentParents() {
-        // tournament selection: to select one individual, T (in this case tournamentSampleSize) individuals are uniformly
-        // chosen, and the best of these T is returned (from the paper Evolutionary Computing by mr Eiben)
-        double initialFitness = -Double.MAX_VALUE;
-
-        // Find the index for the first parent
-        List<Integer> populationRange = range(0, populationSize - 1);
-        List<Integer> sample1 = sample(populationRange);
-        int parentIndex1 = selectIndividualForTournament(sample1, "best", initialFitness);
-
-        // Remove first parent from list of possibilities
-        Collections.sort(populationRange);
-        populationRange.remove(parentIndex1);
-
-        // Find the index for the second parent
-        List<Integer> sample2 = sample(populationRange);
-        int parentIndex2 = selectIndividualForTournament(sample2, "best", initialFitness);
-
-        Individual[] parents = {population[parentIndex1], population[parentIndex2]};
+    private DiffIndividual[] randomParentSelection(List<Integer> populationRange, int sampleSize){
+        List<Integer> sample = sample(populationRange, sampleSize);
+        DiffIndividual[] parents = {population[sample.get(0)], population[sample.get(1)], population[sample.get(2)]};
         return parents;
     }
 
-    private int tournamentDying(){
-        // tournament selection: to select one individual, T (in this case tournamentSampleSize) individuals are uniformly
-        // chosen, and the best of these T is returned (from the paper Evolutionary Computing by mr Eiben)
-
-        double initialFitness = Double.MAX_VALUE;
-
-        // Find the index for the one who will be dying
-        List<Integer> populationRange = range(0, populationSize - 1);
-        List<Integer> sample1 = sample(populationRange);
-        int dyingIndex = selectIndividualForTournament(sample1, "worst", initialFitness);
-
-        return dyingIndex;
-    }
-
-    private List<Integer> sample(List<Integer> listForSample) {
-        Collections.shuffle(listForSample);
-        List<Integer> sample = listForSample.subList(0, tounamentSampleSize);
-        return sample;
-    }
-
-    private int selectIndividualForTournament(List<Integer> indexSample, String tournamentType, double fitnessBestFit) {
+    private DiffIndividual[] tournamentParentSelection(List<Integer> populationRange, int numParents){
         int individualIndex = -1;
-        for (int indexCounter = 0; indexCounter < tounamentSampleSize; indexCounter++) {
-            int indexFromSample = indexSample.get(indexCounter);
-            double individualFitness;
-            if(multimodal){
-                individualFitness = population[indexFromSample].getSharedFitness();
-            }else {
-                individualFitness = population[indexFromSample].getFitness();
+        double fitnessBestFit = -Double.MAX_VALUE;
+        DiffIndividual[] parents = new DiffIndividual[numParents];
+        for (int parentCounter = 0; parentCounter < numParents; parentCounter++){
+            if (parentCounter > 0){
+                populationRange.remove(parents[parentCounter-1]);
             }
-            if (tournamentType.equals("best")) {
+            List<Integer> indexSample = sample(populationRange, tournamentSampleSize);
+            for (int indexCounter = 0; indexCounter < tournamentSampleSize; indexCounter++) {
+                int indexFromSample = indexSample.get(indexCounter);
+                double individualFitness;
+//            if(multimodal){
+//                individualFitness = population[indexFromSample].getSharedFitness();
+//            }else {
+                individualFitness = population[indexFromSample].getFitness();
                 if (individualFitness > fitnessBestFit) {
                     fitnessBestFit = individualFitness;
                     individualIndex = indexFromSample;
                 } else {
                     continue;
                 }
-            } else if (tournamentType.equals("worst")) {
-                if (individualFitness < fitnessBestFit) {
-                    fitnessBestFit = individualFitness;
-                    individualIndex = indexFromSample;
-                } else {
-                    continue;
-                }
-            } else {
-                System.out.println("not a known tournamentType");
+            parents[parentCounter] = population[individualIndex];
             }
         }
-        return individualIndex;
+
+        return parents;
     }
 
-    private Individual generateOffspring(Individual[] parents) {
-        //Generate offspring based on uniform crossover
+    private List<Integer> sample(List<Integer> listForSample, int sampleSize) {
+        Collections.shuffle(listForSample);
+        List<Integer> sample = listForSample.subList(0, sampleSize);
+        return sample;
+    }
+
+    private DiffIndividual generateOffspring(DiffIndividual currentAgent, DiffIndividual[] parents) {
+        //Generate offspring
         if(parents != null) {
             int nParents = parents.length;
             int genomeLenght = parents[0].getGenome().length;
             double[] childGenome = new double[genomeLenght];
-            switch (typeCrossOver) {
-                case "uniform":
-                    childGenome = uniformCrossOver(parents, childGenome, nParents, genomeLenght);
-                    break;
-                case "blend":
-                    childGenome = blendCrossOver(parents, childGenome, nParents, genomeLenght);
-                    break;
-                default:
-                    childGenome = blendCrossOver(parents, childGenome, nParents, genomeLenght);
-                    break;
-            }
-            Individual child = new Individual(childGenome);
-            child.mutate(mutationRate);
+
+            childGenome = differentialCrossOver(currentAgent, parents, childGenome, genomeLenght);
+
+            DiffIndividual child = new DiffIndividual(childGenome);
             return child;
+
         }else{
             return null;
         }
     }
 
-    private double[] blendCrossOver(Individual[] parents, double[] childGenome, int nParents, int genomeLenght){
-        // create new gene out of random sample in the range between genes parents
-        double biggestGene = -Double.MAX_VALUE;
-        double smallestGene = Double.MAX_VALUE;
-        Random rand = new Random();
-        // loop over the genomes of the parents and determine per gene which one is the lowest
-        // and which one is the highest gene value, so they can be used in the blending for the
-        // gene of the child
-        for(int i=0; i<genomeLenght; i++){
-            for(int j=0; j<nParents; j++){
-                double gene = parents[j].getGenome()[i];
-                if (gene>biggestGene) {
-                    biggestGene = gene;
-                }
-                if (gene<smallestGene) {
-                    smallestGene = gene;
-                }
-                else {
-                    continue;
-                }
+    private double[] differentialCrossOver(DiffIndividual currentAgent, DiffIndividual[] parents, double[] childGenome, int genomeLenght){
+        //Use all three parents and the current Agent to create the child of the currentAgent
+
+        //First generate a random cut index
+        int cutIndexR = ThreadLocalRandom.current().nextInt(0, 10 + 1);
+
+        for(int j=0; j<genomeLenght; j++) {
+            Random r = new Random();
+            double randDouble = r.nextDouble();
+            if (j == cutIndexR || randDouble < crossoverProbability) {
+                double genP1 = parents[0].getGenome()[j];
+                double genP2 = parents[1].getGenome()[j];
+                double genP3 = parents[2].getGenome()[j];
+                childGenome[j] = genP1 + mutationConstant * (genP2 - genP3);
             }
-            double d = biggestGene-smallestGene;
-            double lowerBound = smallestGene - (alphaBlend * d) ;
-            double upperBound = biggestGene + (alphaBlend * d) ;
-            double randomDouble = rand.nextDouble();
-            // generating a random double between lowerBound and the upperBound
-            childGenome[i] = lowerBound + ((upperBound - lowerBound) * randomDouble);
+            else{
+                childGenome[j] = currentAgent.getGenome()[j];
+            }
         }
         return childGenome;
     }
