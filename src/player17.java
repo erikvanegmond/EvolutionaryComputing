@@ -47,25 +47,26 @@ public class player17 implements ContestSubmission
     public void run()
     {
         // init population
-        Population pop = new Population(population_limit, evaluations_limit_, evaluation_);
+        //Population pop = new Population(population_limit, evaluations_limit_, evaluation_);
+        DiffPopulation pop = new DiffPopulation(population_limit, evaluations_limit_, evaluation_);
 
 
         //evaluate entire population
         pop.evaluate();
         if(isMultimodal){
             pop.setMultimodal(isMultimodal);
-            pop.sharedFitness();
+//            pop.sharedFitness();
         }
 
 
         while(pop.canEvaluate()){
-            if(pop.getNoChangeCounter() > 10){
-                pop.setMutationRate(pop.getMutationRate()*1.01);
-                pop.setNoChangeCounter(9);
-            }
-            if(pop.getNoChangeCounter() < 2){
-                pop.setMutationRate(1);
-            }
+//            if(pop.getNoChangeCounter() > 10){
+//                pop.setMutationRate(pop.getMutationRate()*1.01);
+//                pop.setNoChangeCounter(9);
+//            }
+//            if(pop.getNoChangeCounter() < 2){
+//                pop.setMutationRate(1);
+//            }
             pop.newGeneration();
         }
 

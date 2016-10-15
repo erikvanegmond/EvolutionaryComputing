@@ -19,8 +19,8 @@ class DiffPopulation implements Iterator<DiffIndividual>{
     //mutationConstant [0,2]
     private double mutationConstant = 1.5;
     private double crossoverProbability = 0.9;
-    private String typeParentSelection = "tournament";
-    private int tournamentSampleSize = 18;
+    private String typeParentSelection = "random";
+    private int tournamentSampleSize = 3;
 
     public int getEvals() {
         return evals;
@@ -48,7 +48,6 @@ class DiffPopulation implements Iterator<DiffIndividual>{
         this.evaluations_limit_ = evaluations_limit_;
         this.evaluation_ = evaluation;
         this.population = new DiffIndividual[populationSize];
-
         for(int individuCounter = 0; individuCounter < populationSize; individuCounter++){
             this.population[individuCounter] = new DiffIndividual(10);
         }
@@ -188,9 +187,8 @@ class DiffPopulation implements Iterator<DiffIndividual>{
             // replace the former current agent
             double fitnessCurrentAgent = evaluateIndividual(currentAgent);
             double fitnessChild = evaluateIndividual(child);
-            if(fitnessCurrentAgent <= fitnessChild){
+            if(fitnessCurrentAgent <= fitnessChild) {
                 population[i] = child;
-                System.out.println("better!");
             }
 
         }
@@ -216,18 +214,17 @@ class DiffPopulation implements Iterator<DiffIndividual>{
         populationRange.remove(currentIndividualIndex);
 
         // Get a sample of the indexes of the 3 parents by using either random selection or tournament selection
-        int sampleSize = 3;
+        int nParents = 3;
         DiffIndividual[] parents = null;
         switch (typeParentSelection) {
             case "random":
-                parents = randomParentSelection(populationRange, sampleSize);
+                parents = randomParentSelection(populationRange, nParents);
                 break;
             case "tournament":
-                parents = tournamentParentSelection(populationRange, sampleSize);
-                System.out.println("in tournament");
+                parents = tournamentParentSelection(populationRange, nParents);
                 break;
             default:
-                parents = tournamentParentSelection(populationRange, sampleSize);
+                parents = randomParentSelection(populationRange, nParents);
                 break;
         }
         return parents;
@@ -261,10 +258,9 @@ class DiffPopulation implements Iterator<DiffIndividual>{
                 } else {
                     continue;
                 }
-            parents[parentCounter] = population[individualIndex];
             }
+            parents[parentCounter] = population[individualIndex];
         }
-
         return parents;
     }
 
