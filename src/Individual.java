@@ -1,4 +1,4 @@
-import org.apache.commons.math3.distribution.MultivariateNormalDistribution;
+//import org.apache.commons.math3.distribution.MultivariateNormalDistribution;
 //import org.apache.commons.math3.linear.ArrayRealVector;
 
 import java.util.Arrays;
@@ -91,7 +91,7 @@ public class Individual implements Comparable<Individual>{
     }
 
     public void mutate(double mutationRate){
-        String mutation = "correlatedMutation";
+        String mutation = "nonuniformMutation";
         switch (mutation){
             case "nonuniformMutation":
                 nonuniformMutation(mutationRate);
@@ -120,8 +120,6 @@ public class Individual implements Comparable<Individual>{
         }
         return cArray;
     }
-
-
     private void correlatedMutation() {
         Random rand = new Random();
 
@@ -141,7 +139,7 @@ public class Individual implements Comparable<Individual>{
         }
 
         double[][] cArray = covarianceMatrix();
-        MultivariateNormalDistribution multivariateDistribution = new MultivariateNormalDistribution(new double[this.genomeSize], cArray);
+//        MultivariateNormalDistribution multivariateDistribution = new MultivariateNormalDistribution(new double[this.genomeSize], cArray);
 
 
 //        ArrayRealVector genomeVector = new ArrayRealVector(genome);
@@ -150,7 +148,7 @@ public class Individual implements Comparable<Individual>{
     }
 
     public void nonuniformMutation(double sigma) {
-        final double mutationChance = 0.3;
+        final double mutationChance = 0.1;
         Random rand = new Random();
         for(int i=0; i < genome.length; i++){
             if (rand.nextDouble() < mutationChance){
@@ -168,7 +166,7 @@ public class Individual implements Comparable<Individual>{
 
     public void uniformMutation(){
     // can be used to get out of a local optimum
-        final double mutationChance = 0.03;
+        final double mutationChance = 0.3;
         Random rand = new Random();
         for(int i=0; i < genome.length; i++){
             if (rand.nextDouble() < mutationChance){

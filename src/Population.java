@@ -18,12 +18,11 @@ class Population implements Iterator<Individual>{
         this.mutationRate = mutationRate;
     }
 
-    private double mutationRate=1;
+    private double mutationRate=0.01;
     private int evals = 0;
     private int index = 0;
-    private int tounamentSampleSize = 18;
+    private int tounamentSampleSize = 45;
     private boolean multimodal = false;
-    private String parentSelector = "best";
     private String typeCrossOver = "uniform";
     private double alphaBlend = 0.4;
     private int noChangeCounter = 0;
@@ -184,8 +183,6 @@ class Population implements Iterator<Individual>{
         final int num_children = 50; //this affects the nochangecounter
         Individual[] children = new Individual[num_children];
 
-
-
         for(int i=0; i< num_children; i++) {
             // Select parents
             Individual[] parents = getParents(2);
@@ -206,7 +203,7 @@ class Population implements Iterator<Individual>{
         }else{
             this.noChangeCounter++;
         }
-//        System.out.println(best +" "+this.noChangeCounter);
+        System.out.println(best +" "+this.noChangeCounter+ " "+mutationRate+" "+evals);
 
         if (multimodal) {
             sharedFitness();
@@ -304,6 +301,9 @@ class Population implements Iterator<Individual>{
                 case "blend":
                     childGenome = blendCrossOver(parents, childGenome, nParents, genomeLenght);
                     break;
+                case "randomBlendCrossOver":
+                    childGenome = randomBlendCrossOver(parents, childGenome, nParents, genomeLenght);
+                    break;
                 default:
                     childGenome = blendCrossOver(parents, childGenome, nParents, genomeLenght);
                     break;
@@ -352,6 +352,32 @@ class Population implements Iterator<Individual>{
             double randomDouble = rand.nextDouble();
             // generating a random double between lowerBound and the upperBound
             childGenome[i] = lowerBound + ((upperBound - lowerBound) * randomDouble);
+        }
+        return childGenome;
+    }
+
+    private double[] randomBlendCrossOver(Individual[] parents, double[] childGenome, int nParents, int genomeLenght){
+        Random rand = new Random();
+
+
+        double[] weights = new double[nParents];
+        double sum = 0;
+
+        for(int i=0; i<nParents; i++) {
+            weights[i] = rand.nextDouble();
+            sum += weights[i];
+        }
+        for(int i=0; i<nParents; i++) {
+            weights[i] /= sum;
+        }
+
+        for(int i=0; i<genomeLenght; i++){
+            double newGene = 0;
+            for(int j=0; j<nParents; j++){
+                double gene = parents[j].getGenome()[i];
+                newGene += gene * weights[j];
+            }
+            childGenome[i] = newGene;
         }
         return childGenome;
     }

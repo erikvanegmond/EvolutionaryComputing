@@ -47,8 +47,8 @@ public class player17 implements ContestSubmission
     public void run()
     {
         // init population
-        //Population pop = new Population(population_limit, evaluations_limit_, evaluation_);
-        DiffPopulation pop = new DiffPopulation(population_limit, evaluations_limit_, evaluation_);
+        Population pop = new Population(population_limit, evaluations_limit_, evaluation_);
+//        DiffPopulation pop = new DiffPopulation(population_limit, evaluations_limit_, evaluation_);
 
 
         //evaluate entire population
