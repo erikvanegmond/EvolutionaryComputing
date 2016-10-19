@@ -7,7 +7,7 @@ import org.vu.contest.ContestEvaluation;
 import java.util.*;
 import java.util.*;
 
-class Population extends BasePopulation{
+class Population extends BasePopulation {
 
     private int tounamentSampleSize = 18;
     private String parentSelector = "best";
@@ -31,7 +31,7 @@ class Population extends BasePopulation{
         Individual[] children = generateOffspring(parents);
         int numChildren = children.length;
 
-        for(int i=0; i<numChildren; i++) {
+        for (int i = 0; i < numChildren; i++) {
             evaluateIndividual(children[i]);
             //Replace the person who has lost in the tournament with the child
             int indexDying = tournamentDying();
@@ -39,10 +39,10 @@ class Population extends BasePopulation{
         }
         // Evaluate population
         double best = evaluate();
-        if(best > this.best){
+        if (best > this.best) {
             this.best = best;
             this.noChangeCounter = 0;
-        }else{
+        } else {
             this.noChangeCounter++;
         }
 //        System.out.println(best +" "+this.noChangeCounter);
@@ -66,7 +66,7 @@ class Population extends BasePopulation{
         // Find the index for the first parent
         List<Integer> populationRange = range(0, populationSize - 1);
 
-        for(int i=0; i<numParents; i++) {
+        for (int i = 0; i < numParents; i++) {
             List<Integer> sample1 = sample(populationRange);
             int parentIndex1 = selectIndividualForTournament(sample1, "best", initialFitness);
             parents[i] = population[parentIndex1];
@@ -83,7 +83,7 @@ class Population extends BasePopulation{
         return parents;
     }
 
-    private int tournamentDying(){
+    private int tournamentDying() {
         // tournament selection: to select one individual, T (in this case tournamentSampleSize) individuals are uniformly
         // chosen, and the best of these T is returned (from the paper Evolutionary Computing by mr Eiben)
 
@@ -108,9 +108,9 @@ class Population extends BasePopulation{
         for (int indexCounter = 0; indexCounter < tounamentSampleSize; indexCounter++) {
             int indexFromSample = indexSample.get(indexCounter);
             double individualFitness;
-            if(multimodal){
+            if (multimodal) {
                 individualFitness = population[indexFromSample].getSharedFitness();
-            }else {
+            } else {
                 individualFitness = population[indexFromSample].getFitness();
             }
             if (tournamentType.equals("best")) {
@@ -143,8 +143,8 @@ class Population extends BasePopulation{
         int numberChildren = nCombinations(nParents, nParentsPerRecombination);
         Individual[] children = new Individual[numberChildren];
         int n = 0;
-        for(int j=0; j<parents.length-1; j++) {
-            for(int k=j+1; k<parents.length; k++) {
+        for (int j = 0; j < parents.length - 1; j++) {
+            for (int k = j + 1; k < parents.length; k++) {
                 n += 1;
                 Individual[] currentParents = new Individual[nParentsPerRecombination];
                 currentParents[0] = parents[j];
@@ -164,7 +164,7 @@ class Population extends BasePopulation{
                     }
                     Individual child = new Individual(childGenome);
                     child.mutate(mutationRate);
-                    children[n-1] = child;
+                    children[n - 1] = child;
                 } else {
                     continue;
                 }
@@ -176,11 +176,11 @@ class Population extends BasePopulation{
     }
 
 
-    public static int nCombinations(int setSize, int combinationSize){
+    public static int nCombinations(int setSize, int combinationSize) {
         int fSet = factorial(setSize);
         int fCom = factorial(combinationSize);
-        int fSetCom = factorial(setSize-combinationSize);
-        int combinations = fSet/(fCom*(fSetCom));
+        int fSetCom = factorial(setSize - combinationSize);
+        int combinations = fSet / (fCom * (fSetCom));
         return combinations;
     }
 
@@ -192,16 +192,16 @@ class Population extends BasePopulation{
         return fact;
     }
 
-    private double[] uniformCrossOver(Individual[] parents, double[] childGenome, int nParents, int genomeLenght){
+    private double[] uniformCrossOver(Individual[] parents, double[] childGenome, int nParents, int genomeLenght) {
         Random rand = new Random();
-        for(int i=0; i<genomeLenght; i++){
+        for (int i = 0; i < genomeLenght; i++) {
             int randomParent = rand.nextInt(nParents);
             childGenome[i] = parents[randomParent].getGenome()[i];
         }
         return childGenome;
     }
 
-    private double[] blendCrossOver(Individual[] parents, double[] childGenome, int nParents, int genomeLenght){
+    private double[] blendCrossOver(Individual[] parents, double[] childGenome, int nParents, int genomeLenght) {
         // create new gene out of random sample in the range between genes parents
         double biggestGene = -Double.MAX_VALUE;
         double smallestGene = Double.MAX_VALUE;
@@ -209,22 +209,21 @@ class Population extends BasePopulation{
         // loop over the genomes of the parents and determine per gene which one is the lowest
         // and which one is the highest gene value, so they can be used in the blending for the
         // gene of the child
-        for(int i=0; i<genomeLenght; i++){
-            for(int j=0; j<nParents; j++){
+        for (int i = 0; i < genomeLenght; i++) {
+            for (int j = 0; j < nParents; j++) {
                 double gene = parents[j].getGenome()[i];
-                if (gene>biggestGene) {
+                if (gene > biggestGene) {
                     biggestGene = gene;
                 }
-                if (gene<smallestGene) {
+                if (gene < smallestGene) {
                     smallestGene = gene;
-                }
-                else {
+                } else {
                     continue;
                 }
             }
-            double d = biggestGene-smallestGene;
-            double lowerBound = smallestGene - (alphaBlend * d) ;
-            double upperBound = biggestGene + (alphaBlend * d) ;
+            double d = biggestGene - smallestGene;
+            double lowerBound = smallestGene - (alphaBlend * d);
+            double upperBound = biggestGene + (alphaBlend * d);
             double randomDouble = rand.nextDouble();
             // generating a random double between lowerBound and the upperBound
             childGenome[i] = lowerBound + ((upperBound - lowerBound) * randomDouble);
@@ -232,50 +231,24 @@ class Population extends BasePopulation{
         return childGenome;
     }
 
-    private double[] randomBlendCrossOver(Individual[] parents, double[] childGenome, int nParents, int genomeLenght){
+    private double[] randomBlendCrossOver(Individual[] parents, double[] childGenome, int nParents, int genomeLenght) {
         Random rand = new Random();
 
 
         double[] weights = new double[nParents];
         double sum = 0;
 
-        for(int i=0; i<nParents; i++) {
+        for (int i = 0; i < nParents; i++) {
             weights[i] = rand.nextDouble();
             sum += weights[i];
         }
-        for(int i=0; i<nParents; i++) {
+        for (int i = 0; i < nParents; i++) {
             weights[i] /= sum;
         }
 
-        for(int i=0; i<genomeLenght; i++){
+        for (int i = 0; i < genomeLenght; i++) {
             double newGene = 0;
-            for(int j=0; j<nParents; j++){
-                double gene = parents[j].getGenome()[i];
-                newGene += gene * weights[j];
-            }
-            childGenome[i] = newGene;
-        }
-        return childGenome;
-    }
-
-    private double[] randomBlendCrossOver(Individual[] parents, double[] childGenome, int nParents, int genomeLenght){
-        Random rand = new Random();
-
-
-        double[] weights = new double[nParents];
-        double sum = 0;
-
-        for(int i=0; i<nParents; i++) {
-            weights[i] = rand.nextDouble();
-            sum += weights[i];
-        }
-        for(int i=0; i<nParents; i++) {
-            weights[i] /= sum;
-        }
-
-        for(int i=0; i<genomeLenght; i++){
-            double newGene = 0;
-            for(int j=0; j<nParents; j++){
+            for (int j = 0; j < nParents; j++) {
                 double gene = parents[j].getGenome()[i];
                 newGene += gene * weights[j];
             }
@@ -285,4 +258,3 @@ class Population extends BasePopulation{
     }
 
 }
-
