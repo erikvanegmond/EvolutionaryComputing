@@ -8,12 +8,12 @@ import java.util.Random;
  * Created by erikv on 14-9-2016.
  */
 public class Individual implements Comparable<Individual>{
-    private final Double minDouble = -Double.MAX_VALUE;
+    private final double minDouble = -Double.MAX_VALUE;
     private double[] genome;
     private double[] sigmas;
     private double[] alphas;
-    private Double fitness = minDouble;
-    private Double sharedFitness = minDouble;
+    private double fitness = minDouble;
+    private double sharedFitness = minDouble;
     private double min = -50;
     private double max = 50;
     private int genomeSize;
@@ -148,7 +148,7 @@ public class Individual implements Comparable<Individual>{
     }
 
     public void nonuniformMutation(double sigma) {
-        final double mutationChance = 0.1;
+        final double mutationChance = 1;
         Random rand = new Random();
         for(int i=0; i < genome.length; i++){
             if (rand.nextDouble() < mutationChance){
