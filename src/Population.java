@@ -12,23 +12,21 @@ class Population extends BasePopulation{
 
     public Population(int populationSize, int evaluations_limit_, ContestEvaluation evaluation) {
         super(populationSize, evaluations_limit_, evaluation);
-        mutationRate = 1;
+        mutationRate = 0.5;
     }
 
     public void newGeneration() {
         //TODO Maybe more children from more couples
-        final int num_children = 50; //this affects the nochangecounter
-        Individual[] children = new Individual[num_children];
+//        final int numChildren = 50; //this affects the nochangecounter
 
+        // Select 10 parents and let all of them mate with all of them
+        // Now with tournament selection, can be changed to for example rank selection
+        Individual[] parents = getParents(10);
+        // Apply crossover / mutation operators -> Create offspring
+        Individual[] children = generateOffspring(parents);
+        int numChildren = children.length;
 
-
-        for(int i=0; i< num_children; i++) {
-            // Select parents
-            Individual[] parents = getParents(2);
-            // Apply crossover / mutation operators -> Create offspring
-            children[i] = generateOffspring(parents);
-        }
-        for(int i=0; i< num_children; i++) {
+        for(int i=0; i<numChildren; i++) {
             evaluateIndividual(children[i]);
             //Replace the person who has lost in the tournament with the child
             int indexDying = tournamentDying();
@@ -50,29 +48,33 @@ class Population extends BasePopulation{
     }
 
     private Individual[] getParents(int numParents) {
-        Individual[] parents = tournamentParents();
+        Individual[] parents = tournamentParents(numParents);
         return parents;
     }
 
-    private Individual[] tournamentParents() {
+    private Individual[] tournamentParents(int numParents) {
         // tournament selection: to select one individual, T (in this case tournamentSampleSize) individuals are uniformly
         // chosen, and the best of these T is returned (from the paper Evolutionary Computing by mr Eiben)
         double initialFitness = -Double.MAX_VALUE;
+        Individual[] parents = new Individual[numParents];
 
         // Find the index for the first parent
         List<Integer> populationRange = range(0, populationSize - 1);
-        List<Integer> sample1 = sample(populationRange);
-        int parentIndex1 = selectIndividualForTournament(sample1, "best", initialFitness);
 
-        // Remove first parent from list of possibilities
-        Collections.sort(populationRange);
-        populationRange.remove(parentIndex1);
+        for(int i=0; i<numParents; i++) {
+            List<Integer> sample1 = sample(populationRange);
+            int parentIndex1 = selectIndividualForTournament(sample1, "best", initialFitness);
+            parents[i] = population[parentIndex1];
 
-        // Find the index for the second parent
-        List<Integer> sample2 = sample(populationRange);
-        int parentIndex2 = selectIndividualForTournament(sample2, "best", initialFitness);
+            // Remove first parent from list of possibilities
+//            Collections.sort(populationRange);
+//            populationRange.remove(parentIndex1);
+        }
+//        // Find the index for the second parent
+//        List<Integer> sample2 = sample(populationRange);
+//        int parentIndex2 = selectIndividualForTournament(sample2, "best", initialFitness);
 
-        Individual[] parents = {population[parentIndex1], population[parentIndex2]};
+//                {population[parentIndex1], population[parentIndex2]};
         return parents;
     }
 
@@ -127,29 +129,62 @@ class Population extends BasePopulation{
         return individualIndex;
     }
 
-    private Individual generateOffspring(Individual[] parents) {
-        //Generate offspring based on uniform crossover
-        if(parents != null) {
-            int nParents = parents.length;
-            int genomeLenght = parents[0].getGenome().length;
-            double[] childGenome = new double[genomeLenght];
-            switch (typeCrossOver) {
-                case "uniform":
-                    childGenome = uniformCrossOver(parents, childGenome, nParents, genomeLenght);
-                    break;
-                case "blend":
-                    childGenome = blendCrossOver(parents, childGenome, nParents, genomeLenght);
-                    break;
-                default:
-                    childGenome = blendCrossOver(parents, childGenome, nParents, genomeLenght);
-                    break;
+    private Individual[] generateOffspring(Individual[] parents) {
+        //Generate offspring based on uniform crossover or blend crossover
+        // combines all parents with each other
+        int genomeLenght = parents[0].getGenome().length;
+        int nParents = parents.length;
+        int nParentsPerRecombination = 2;
+        int numberChildren = nCombinations(nParents, nParentsPerRecombination);
+        Individual[] children = new Individual[numberChildren];
+        int n = 0;
+        for(int j=0; j<parents.length-1; j++) {
+            for(int k=j+1; k<parents.length; k++) {
+                n += 1;
+                Individual[] currentParents = new Individual[nParentsPerRecombination];
+                currentParents[0] = parents[j];
+                currentParents[1] = parents[k];
+                if (parents != null) {
+                    double[] childGenome = new double[genomeLenght];
+                    switch (typeCrossOver) {
+                        case "uniform":
+                            childGenome = uniformCrossOver(parents, childGenome, nParentsPerRecombination, genomeLenght);
+                            break;
+                        case "blend":
+                            childGenome = blendCrossOver(parents, childGenome, nParentsPerRecombination, genomeLenght);
+                            break;
+                        default:
+                            childGenome = blendCrossOver(parents, childGenome, nParentsPerRecombination, genomeLenght);
+                            break;
+                    }
+                    Individual child = new Individual(childGenome);
+                    child.mutate(mutationRate);
+                    children[n-1] = child;
+                } else {
+                    continue;
+                }
             }
-            Individual child = new Individual(childGenome);
-            child.mutate(mutationRate);
-            return child;
-        }else{
-            return null;
         }
+        System.out.println("n");
+        System.out.println(n);
+        return children;
+    }
+
+
+    public static int nCombinations(int setSize, int combinationSize){
+        int fSet = factorial(setSize);
+        int fCom = factorial(combinationSize);
+        int fSetCom = factorial(setSize-combinationSize);
+        int combinations = fSet/(fCom*(fSetCom));
+        return combinations;
+    }
+
+    public static int factorial(int n) {
+        int fact = 1; // this  will be the result
+        for (int i = 1; i <= n; i++) {
+            fact *= i;
+        }
+        return fact;
     }
 
     private double[] uniformCrossOver(Individual[] parents, double[] childGenome, int nParents, int genomeLenght){
