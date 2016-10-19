@@ -1,4 +1,4 @@
-import org.apache.commons.math3.distribution.MultivariateNormalDistribution;
+//import org.apache.commons.math3.distribution.MultivariateNormalDistribution;
 //import org.apache.commons.math3.linear.ArrayRealVector;
 
 import java.util.Arrays;
@@ -91,63 +91,63 @@ public class Individual implements Comparable<Individual>{
     }
 
     public void mutate(double mutationRate){
-        String mutation = "correlatedMutation";
+        String mutation = "nonuniformMutation";
         switch (mutation){
             case "nonuniformMutation":
                 nonuniformMutation(mutationRate);
             case "uniformMutation":
                 uniformMutation();
-            case "correlatedMutation":
-                correlatedMutation();
+//            case "correlatedMutation":
+//                correlatedMutation();
             break;
         }
 
     }
 
-    private double[][] covarianceMatrix(){
-        double[][] cArray = new double[this.sigmas.length][this.sigmas.length];
-        for(int i=0; i<this.sigmas.length; i++){
-            double i2 =  this.sigmas[i]*this.sigmas[i];
-            for(int j=0; i<this.sigmas.length; i++){
-                double j2 =  this.sigmas[j]*this.sigmas[j];
-                if(i==j){
-                    cArray[i][j] = i2;
-                }else{
-                    double tan = 2 * cArray[i][j]/(i2 - j2);
-                    cArray[i][j] = 0.5 * (i2 - j2) * tan;
-                }
-            }
-        }
-        return cArray;
-    }
+//    private double[][] covarianceMatrix(){
+//        double[][] cArray = new double[this.sigmas.length][this.sigmas.length];
+//        for(int i=0; i<this.sigmas.length; i++){
+//            double i2 =  this.sigmas[i]*this.sigmas[i];
+//            for(int j=0; i<this.sigmas.length; i++){
+//                double j2 =  this.sigmas[j]*this.sigmas[j];
+//                if(i==j){
+//                    cArray[i][j] = i2;
+//                }else{
+//                    double tan = 2 * cArray[i][j]/(i2 - j2);
+//                    cArray[i][j] = 0.5 * (i2 - j2) * tan;
+//                }
+//            }
+//        }
+//        return cArray;
+//    }
 
 
-    private void correlatedMutation() {
-        Random rand = new Random();
-
-        //calculate the c matrix;
-
-
-
-        //update sigma
-        for(int i=0; i<this.sigmas.length; i++){
-            this.sigmas[i] = this.sigmas[i] * Math.exp(this.tau_prime * rand.nextDouble() + this.tau * rand.nextDouble());
-        }
-
-        //update alphas
-        double beta = Math.toRadians(5);
-        for(int j=0; j<this.alphas.length; j++){
-            this.alphas[j] = this.alphas[j] + beta * rand.nextDouble();
-        }
-
-        double[][] cArray = covarianceMatrix();
-        MultivariateNormalDistribution multivariateDistribution = new MultivariateNormalDistribution(new double[this.genomeSize], cArray);
-
-
-//        ArrayRealVector genomeVector = new ArrayRealVector(genome);
-//        genomeVector.add(new ArrayRealVector(multivariateDistribution.sample()));
-//        genome = genomeVector.toArray();
-    }
+//    private void correlatedMutation() {
+//        Random rand = new Random();
+//
+//        //calculate the c matrix;
+//
+//
+//
+//        //update sigma
+//        for(int i=0; i<this.sigmas.length; i++){
+//            this.sigmas[i] = this.sigmas[i] * Math.exp(this.tau_prime * rand.nextDouble() + this.tau * rand.nextDouble());
+//        }
+//
+//        //update alphas
+//        double beta = Math.toRadians(5);
+//        for(int j=0; j<this.alphas.length; j++){
+//            this.alphas[j] = this.alphas[j] + beta * rand.nextDouble();
+//        }
+//
+//        double[][] cArray = covarianceMatrix();
+//        MultivariateNormalDistribution multivariateDistribution = new MultivariateNormalDistribution(new double[this.genomeSize], cArray);
+//
+//
+////        ArrayRealVector genomeVector = new ArrayRealVector(genome);
+////        genomeVector.add(new ArrayRealVector(multivariateDistribution.sample()));
+////        genome = genomeVector.toArray();
+//    }
 
     public void nonuniformMutation(double sigma) {
         final double mutationChance = 0.3;

@@ -14,6 +14,7 @@ public class player17 implements ContestSubmission
     private boolean isMultimodal;
     private boolean hasStructure;
     private boolean isSeparable;
+    private int differential = 1;
 
     public player17()
     {
@@ -46,37 +47,46 @@ public class player17 implements ContestSubmission
 
     public void run()
     {
+        BasePopulation pop;
         // init population
-        Population pop = new Population(population_limit, evaluations_limit_, evaluation_);
+        switch (differential) {
+            case 0: {
+                pop = new Population(population_limit, evaluations_limit_, evaluation_);
+                break;
+            }
+            case 1: {
+                pop = new DiffPopulation(population_limit, evaluations_limit_, evaluation_);
+                break;
+            }
+            default: {
+                pop = new Population(population_limit, evaluations_limit_, evaluation_);
+                break;
+            }
+        }
 
 
         //evaluate entire population
         pop.evaluate();
-        if(isMultimodal){
+        if(isMultimodal && differential == 0){
             pop.setMultimodal(isMultimodal);
             pop.sharedFitness();
         }
 
-
         while(pop.canEvaluate()){
-            if(pop.getNoChangeCounter() > 10){
+            if(pop.getNoChangeCounter() > 10 && differential == 0){
                 pop.setMutationRate(pop.getMutationRate()*1.01);
                 pop.setNoChangeCounter(9);
             }
-            if(pop.getNoChangeCounter() < 2){
+            if(pop.getNoChangeCounter() < 2 && differential == 0){
                 pop.setMutationRate(1);
             }
-            pop.newGeneration();
+            if(differential == 0) {
+                pop.newGeneration();
+            }
+            else{
+                pop.newGeneration();
+            }
         }
-
     }
-
-
-
-
-
-
-
-
 
 }
