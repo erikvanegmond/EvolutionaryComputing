@@ -14,7 +14,7 @@ public class player17 implements ContestSubmission
     private boolean isMultimodal;
     private boolean hasStructure;
     private boolean isSeparable;
-    private int differential = 1;
+    private int differential = 0;
 
     public player17()
     {
