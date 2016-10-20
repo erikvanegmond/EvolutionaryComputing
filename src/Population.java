@@ -1,17 +1,14 @@
 import org.vu.contest.ContestEvaluation;
 
-import java.util.*;
-
-import org.vu.contest.ContestEvaluation;
-
-import java.util.*;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Random;
 
 class Population extends BasePopulation {
 
     private int tounamentSampleSize = 18;
     private String parentSelector = "best";
-    private String typeCrossOver = "uniform";
+    private String typeCrossOver = "randomBlendCrossOver";
     private double alphaBlend = 0.4;
 
 
@@ -157,6 +154,9 @@ class Population extends BasePopulation {
                             break;
                         case "blend":
                             childGenome = blendCrossOver(parents, childGenome, nParentsPerRecombination, genomeLenght);
+                            break;
+                        case "randomBlendCrossOver":
+                            childGenome = randomBlendCrossOver(parents, childGenome, nParentsPerRecombination, genomeLenght);
                             break;
                         default:
                             childGenome = blendCrossOver(parents, childGenome, nParentsPerRecombination, genomeLenght);
