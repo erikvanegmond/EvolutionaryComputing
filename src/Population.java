@@ -1,20 +1,25 @@
 import org.vu.contest.ContestEvaluation;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 class Population extends BasePopulation {
 
     private int tounamentSampleSize = 18;
-    private String parentSelector = "best";
-    private String typeCrossOver = "randomBlendCrossOver";
+    private Crossover crossover = new RandomBlendCrossover();
     private double alphaBlend = 0.4;
 
 
     public Population(int populationSize, int evaluations_limit_, ContestEvaluation evaluation) {
         super(populationSize, evaluations_limit_, evaluation);
-        mutationRate = 0.5;
+        mutationRate = 0.01;
+    }
+
+    public double averageFitness(){
+        double sum = 0;
+        for(Individual individual : population){
+            sum += individual.getFitness();
+        }
+        return sum/populationSize;
     }
 
     public void newGeneration() {
@@ -23,17 +28,27 @@ class Population extends BasePopulation {
 
         // Select 10 parents and let all of them mate with all of them
         // Now with tournament selection, can be changed to for example rank selection
-        Individual[] parents = getParents(10);
+        Individual[] parents = getParents(50);
         // Apply crossover / mutation operators -> Create offspring
         Individual[] children = generateOffspring(parents);
         int numChildren = children.length;
 
-        for (int i = 0; i < numChildren; i++) {
-            evaluateIndividual(children[i]);
-            //Replace the person who has lost in the tournament with the child
-            int indexDying = tournamentDying();
-            population[indexDying] = children[i];
-        }
+        Individual[] combined = new Individual[population.length + children.length];
+        System.arraycopy(population, 0, combined, 0, population.length);
+        System.arraycopy(children, 0, combined, population.length, children.length);
+        evaluate(combined);
+        population = selectTopN(populationSize, combined);
+
+
+//        for (int i = 0; i < numChildren; i++) {
+//            evaluateIndividual(children[i]);
+//            //Replace the person who has lost in the tournament with the child
+//            int indexDying = tournamentDying();
+//            if(population[indexDying].getFitness() < children[i].getFitness()) {
+//                population[indexDying] = children[i];
+//            }
+//        }
+
         // Evaluate population
         double best = evaluate();
         if (best > this.best) {
@@ -42,7 +57,7 @@ class Population extends BasePopulation {
         } else {
             this.noChangeCounter++;
         }
-//        System.out.println(best +" "+this.noChangeCounter);
+        System.out.println(best +" "+ averageFitness());
 
         if (multimodal) {
             sharedFitness();
@@ -50,8 +65,19 @@ class Population extends BasePopulation {
     }
 
     private Individual[] getParents(int numParents) {
-        Individual[] parents = tournamentParents(numParents);
+//        Individual[] parents = tournamentParents(numParents);
+        Individual[] parents = selectTopN(numParents, population);
         return parents;
+    }
+
+    private Individual[] selectTopN(int n, Individual[] selectFrom){
+        if(n < selectFrom.length) {
+            Arrays.sort(selectFrom);
+            Individual[] selected = Arrays.copyOfRange(selectFrom, 0, n);
+            return selected;
+        }else{
+            return null;
+        }
     }
 
     private Individual[] tournamentParents(int numParents) {
@@ -134,127 +160,18 @@ class Population extends BasePopulation {
     private Individual[] generateOffspring(Individual[] parents) {
         //Generate offspring based on uniform crossover or blend crossover
         // combines all parents with each other
-        int genomeLenght = parents[0].getGenome().length;
         int nParents = parents.length;
-        int nParentsPerRecombination = 2;
-        int numberChildren = nCombinations(nParents, nParentsPerRecombination);
-        Individual[] children = new Individual[numberChildren];
         int n = 0;
-        for (int j = 0; j < parents.length - 1; j++) {
-            for (int k = j + 1; k < parents.length; k++) {
-                n += 1;
-                Individual[] currentParents = new Individual[nParentsPerRecombination];
-                currentParents[0] = parents[j];
-                currentParents[1] = parents[k];
-                if (parents != null) {
-                    double[] childGenome = new double[genomeLenght];
-                    switch (typeCrossOver) {
-                        case "uniform":
-                            childGenome = uniformCrossOver(parents, childGenome, nParentsPerRecombination, genomeLenght);
-                            break;
-                        case "blend":
-                            childGenome = blendCrossOver(parents, childGenome, nParentsPerRecombination, genomeLenght);
-                            break;
-                        case "randomBlendCrossOver":
-                            childGenome = randomBlendCrossOver(parents, childGenome, nParentsPerRecombination, genomeLenght);
-                            break;
-                        default:
-                            childGenome = blendCrossOver(parents, childGenome, nParentsPerRecombination, genomeLenght);
-                            break;
-                    }
-                    Individual child = new Individual(childGenome);
-                    child.mutate(mutationRate);
-                    children[n - 1] = child;
-                } else {
-                    continue;
-                }
-            }
+
+        ListCrossover listCrossover = new AllWithAllCrossover();
+
+        Individual[] children = listCrossover.combinelist(parents, crossover);
+
+        for(int i=0; i<children.length; i++){
+            children[i].mutate(mutationRate);
         }
-        System.out.println("n");
-        System.out.println(n);
+
         return children;
-    }
-
-
-    public static int nCombinations(int setSize, int combinationSize) {
-        int fSet = factorial(setSize);
-        int fCom = factorial(combinationSize);
-        int fSetCom = factorial(setSize - combinationSize);
-        int combinations = fSet / (fCom * (fSetCom));
-        return combinations;
-    }
-
-    public static int factorial(int n) {
-        int fact = 1; // this  will be the result
-        for (int i = 1; i <= n; i++) {
-            fact *= i;
-        }
-        return fact;
-    }
-
-    private double[] uniformCrossOver(Individual[] parents, double[] childGenome, int nParents, int genomeLenght) {
-        Random rand = new Random();
-        for (int i = 0; i < genomeLenght; i++) {
-            int randomParent = rand.nextInt(nParents);
-            childGenome[i] = parents[randomParent].getGenome()[i];
-        }
-        return childGenome;
-    }
-
-    private double[] blendCrossOver(Individual[] parents, double[] childGenome, int nParents, int genomeLenght) {
-        // create new gene out of random sample in the range between genes parents
-        double biggestGene = -Double.MAX_VALUE;
-        double smallestGene = Double.MAX_VALUE;
-        Random rand = new Random();
-        // loop over the genomes of the parents and determine per gene which one is the lowest
-        // and which one is the highest gene value, so they can be used in the blending for the
-        // gene of the child
-        for (int i = 0; i < genomeLenght; i++) {
-            for (int j = 0; j < nParents; j++) {
-                double gene = parents[j].getGenome()[i];
-                if (gene > biggestGene) {
-                    biggestGene = gene;
-                }
-                if (gene < smallestGene) {
-                    smallestGene = gene;
-                } else {
-                    continue;
-                }
-            }
-            double d = biggestGene - smallestGene;
-            double lowerBound = smallestGene - (alphaBlend * d);
-            double upperBound = biggestGene + (alphaBlend * d);
-            double randomDouble = rand.nextDouble();
-            // generating a random double between lowerBound and the upperBound
-            childGenome[i] = lowerBound + ((upperBound - lowerBound) * randomDouble);
-        }
-        return childGenome;
-    }
-
-    private double[] randomBlendCrossOver(Individual[] parents, double[] childGenome, int nParents, int genomeLenght) {
-        Random rand = new Random();
-
-
-        double[] weights = new double[nParents];
-        double sum = 0;
-
-        for (int i = 0; i < nParents; i++) {
-            weights[i] = rand.nextDouble();
-            sum += weights[i];
-        }
-        for (int i = 0; i < nParents; i++) {
-            weights[i] /= sum;
-        }
-
-        for (int i = 0; i < genomeLenght; i++) {
-            double newGene = 0;
-            for (int j = 0; j < nParents; j++) {
-                double gene = parents[j].getGenome()[i];
-                newGene += gene * weights[j];
-            }
-            childGenome[i] = newGene;
-        }
-        return childGenome;
     }
 
 }

@@ -126,6 +126,21 @@ abstract class BasePopulation implements Iterator<Individual>{
         return maxFitness;
     }
 
+    public double evaluate(Individual[] individuals) {
+        double maxFitness = Integer.MIN_VALUE;
+
+        for(Individual individual : individuals){
+            Double fitness = -Double.MAX_VALUE;
+            fitness = evaluateIndividual(individual);
+            if (fitness > maxFitness) {
+                maxFitness = fitness;
+//                bestIndividual = individual;
+            }
+            individual.setFitness(fitness);
+        }
+        return maxFitness;
+    }
+
     public double evaluateIndividual(Individual individual){
         if (!individual.hasScore()) {
             if (evals < evaluations_limit_) {

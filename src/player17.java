@@ -9,7 +9,7 @@ public class player17 implements ContestSubmission
     Random rnd_;
     ContestEvaluation evaluation_;
     private int evaluations_limit_;
-    final private int population_limit = 100;
+    final private int population_limit = 200;
     final private int individual_size = 10;
     private boolean isMultimodal;
     private boolean hasStructure;
