@@ -64,7 +64,17 @@ public class player17 implements ContestSubmission
 
     public void run() {
 
+        //All things that needed to be initialized
+        individuals = new ArrayList<Individual[]>();
+        ListCrossover listCrossover = new AllWithAllCrossover();
+        int c = 0;
+        int numberOfChildren = 100;
+        Individual[] parents;
+        Individual[] happyChildren;
+        Individual[] sadChildren = new Individual[200];
+        int noChangeCounter = 0;
         BasePopulation pop;
+
         // init population
         switch (differential) {
             case 0: {
@@ -81,35 +91,23 @@ public class player17 implements ContestSubmission
             }
         }
 
-        //All things that needed to be initialized
-        individuals = new ArrayList<Individual[]>();
-        ListCrossover listCrossover = new AllWithAllCrossover();
-        int c = 0;
-        int numberOfChildren = 100;
-        Individual[] parents;
-        Individual[] happyChildren;
-        Individual[] sadChildren = new Individual[200];
-        int noChangeCounter = 0;
-
         //evaluate entire population
         pop.evaluate();
-        evals++;
         Individual[] population = pop.population;
         System.out.println("population length: " + population.length);
 
         while (evals < evaluations_limit_) {
 
             // select parents
-            //TODO: make method in which you pass the population. Since it is now an object and therefor not easy to clear
-            //or make method to clear the object population
             parents = getParents(50, population);
-            Arrays.fill(sadChildren, null);
+//            Arrays.fill(sadChildren, null);
+//            System.out.println("sadChildren: " + sadChildren);
             //creates an empty array of length population_limit
-            Arrays.fill(population, null);
+//            Arrays.fill(population, null);
 
             // have some children
             happyChildren = listCrossover.combinelist(parents, crossover);
-            Arrays.fill(parents, null);
+//            Arrays.fill(parents, null);
 
             // mutate the offspring
             sadChildren = new Individual[happyChildren.length];
@@ -117,11 +115,10 @@ public class player17 implements ContestSubmission
                 sadChildren[i] = nonuniformMutation(0.005, happyChildren[i]);
             }
 
-            Arrays.fill(happyChildren, null);
+//            Arrays.fill(happyChildren, null);
 
             // check fitness
             evaluate(sadChildren);
-            evals++;
 
             // select survivors
             //TO DO: make method which passes the population (sadChildren) not using the pop object
@@ -134,7 +131,7 @@ public class player17 implements ContestSubmission
             } else {
                 noChangeCounter++;
             }
-            System.out.println(best +" "+ averageFitness(population));
+            System.out.println("best and average: " + best +" "+ averageFitness(population));
 
             c++;
         }
@@ -230,6 +227,7 @@ public class player17 implements ContestSubmission
         for(Individual individual : population){
             sum += individual.getFitness();
         }
+        System.out.println("sum/population: " +  sum/populationSize);
         return sum/populationSize;
     }
 
@@ -239,6 +237,7 @@ public class player17 implements ContestSubmission
                 evals++;
                 double fitness = -Double.MAX_VALUE;
                 if (evaluation_.evaluate(individual.getGenome()) != null) {
+                    System.out.println("Nullpointer: " + (double) evaluation_.evaluate(individual.getGenome()));
                     fitness = (double) evaluation_.evaluate(individual.getGenome());
                 }
                 individual.setFitness(fitness);
