@@ -14,13 +14,7 @@ class Population extends BasePopulation {
         mutationRate = 0.01;
     }
 
-    public double averageFitness(){
-        double sum = 0;
-        for(Individual individual : population){
-            sum += individual.getFitness();
-        }
-        return sum/populationSize;
-    }
+
 
     public void newGeneration() {
         //TODO Maybe more children from more couples
@@ -124,6 +118,15 @@ class Population extends BasePopulation {
         Collections.shuffle(listForSample);
         List<Integer> sample = listForSample.subList(0, tounamentSampleSize);
         return sample;
+    }
+
+    private double averageFitness(){
+        double sum = 0;
+        populationSize = population.length;
+        for(Individual individual : population){
+            sum += individual.getFitness();
+        }
+        return sum/populationSize;
     }
 
     private int selectIndividualForTournament(List<Integer> indexSample, String tournamentType, double fitnessBestFit) {
