@@ -7,17 +7,16 @@ import java.util.Arrays;
 public class SelectTopN implements Selector{
     @Override
     public Individual[] select(int n,Individual[] selectFrom){
-        try {
-            if (n < selectFrom.length) {
+        if (n < selectFrom.length) {
+            try {
                 Arrays.sort(selectFrom);
-                Individual[] selected = Arrays.copyOfRange(selectFrom, 0, n);
-                return selected;
-            } else {
-                return null;
+            }catch (Exception e) {
+                System.out.println("Ignoring error!!!!");
             }
-        }catch (Exception e){
-            System.out.println(e);
+            Individual[] selected = Arrays.copyOfRange(selectFrom, 0, n);
+            return selected;
+        } else {
+            return null;
         }
-        return null;
     }
 }

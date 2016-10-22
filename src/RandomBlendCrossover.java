@@ -13,19 +13,31 @@ public class RandomBlendCrossover implements Crossover {
         Random rand = new Random();
 
 
-        double[] weights = new double[nParents];
+        double[] weights;// = new double[nParents];
         double sum = 0;
-
-        for (int i = 0; i < nParents; i++) {
-            weights[i] = rand.nextDouble();
-            sum += weights[i];
-        }
-        for (int i = 0; i < nParents; i++) {
-            weights[i] /= sum;
-        }
+        /*
+         *   for (int i = 0; i < nParents; i++) {
+         *       weights[i] = rand.nextDouble();
+         *       sum += weights[i];
+         *   }
+         *   for (int i = 0; i < nParents; i++) {
+         *       weights[i] /= sum;
+         *   }
+         */
 
         for (int i = 0; i < genomeLenght; i++) {
             double newGene = 0;
+            weights = new double[nParents];
+            sum = 0;
+
+            for (int p = 0; p < nParents; p++) {
+                weights[p] = rand.nextDouble();
+                sum += weights[p];
+            }
+            for (int p = 0; p < nParents; p++) {
+                weights[p] /= sum;
+            }
+
             for (int j = 0; j < nParents; j++) {
                 double gene = parents[j].getGenome()[i];
                 newGene += gene * weights[j];

@@ -1,18 +1,16 @@
 import org.vu.contest.ContestEvaluation;
 
-import java.util.*;
-
 class Population extends BasePopulation {
 
     private int tounamentSampleSize = 18;
-    private Crossover crossover = new RandomBlendCrossover();
+    private Crossover crossover = new UniformCrossover();
     private ListCrossover listCrossover = new AllWithAllCrossover();
     private Selector selector = new SelectTopN();
     private Mutator mutator = new NonUniformMutation();
 
     public Population(int populationSize, int evaluations_limit_, ContestEvaluation evaluation) {
         super(populationSize, evaluations_limit_, evaluation);
-        mutationRate = 0.01;
+        mutationRate = 0.1;
     }
 
     public void newGeneration() {
@@ -24,37 +22,36 @@ class Population extends BasePopulation {
         */
 
         // 1) Make parents list
-        Individual[] parents = getParents(20);
+        Individual[] parents = getParents(10);
 
         // 2) mate parents
         Individual[] children = listCrossover.combinelist(parents, crossover);
-        System.out.println("n children: "+children.length);
 
         // 3) mutate children
         for(int i=0; i<children.length; i++){
             mutator.mutate(children[i]);
         }
 
+        // 4.5) combine
+        Individual[] combined = (Individual[]) Utils.mergeIndividualLists(population, children);
+
         // 4) Evaluate entire children
-        evaluate(children);
+        double best = evaluate(combined);
 
         // 5) select top n to make new population
-        if( selector.select(populationSize, children)!=null) {
-            population = selector.select(populationSize, children);
-        }else{
-            System.out.println();
-        }
+        population = selector.select(populationSize, combined);
+        System.out.println("Best:"+best+" average: "+averageFitness());
 
     }
 
 
     private double averageFitness(){
         double sum = 0;
-        populationSize = population.length;
+        int popSize = population.length;
         for(Individual individual : population){
             sum += individual.getFitness();
         }
-        return sum/populationSize;
+        return sum/popSize;
     }
 
     private Individual[] generateOffspring(Individual[] parents) {
