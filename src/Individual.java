@@ -14,8 +14,8 @@ public class Individual implements Comparable<Individual>{
     private double[] alphas;
     private double fitness = minDouble;
     private double sharedFitness = minDouble;
-    private double min = -50;
-    private double max = 50;
+    private double min = -5;
+    private double max = 5;
     private int genomeSize;
     private double tau;
     private double tau_prime;

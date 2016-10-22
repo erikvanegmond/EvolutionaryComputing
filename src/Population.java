@@ -6,56 +6,43 @@ class Population extends BasePopulation {
 
     private int tounamentSampleSize = 18;
     private Crossover crossover = new RandomBlendCrossover();
-    private double alphaBlend = 0.4;
-
+    private ListCrossover listCrossover = new AllWithAllCrossover();
 
     public Population(int populationSize, int evaluations_limit_, ContestEvaluation evaluation) {
         super(populationSize, evaluations_limit_, evaluation);
         mutationRate = 0.01;
     }
 
-
-
     public void newGeneration() {
-        //TODO Maybe more children from more couples
-//        final int numChildren = 50; //this affects the nochangecounter
+        /*  1) Make parents list
+            2) Mate parents -> children
+            3) Mutate children -> sadChildren?
+            4) Evaluate
+            5) Select topn -> new pop
+        */
 
-        // Select 10 parents and let all of them mate with all of them
-        // Now with tournament selection, can be changed to for example rank selection
-        Individual[] parents = getParents(50);
-        // Apply crossover / mutation operators -> Create offspring
-        Individual[] children = generateOffspring(parents);
-        int numChildren = children.length;
+        // 1) Make parents list
+        Individual[] parents = getParents(20);
 
-        Individual[] combined = new Individual[population.length + children.length];
-        System.arraycopy(population, 0, combined, 0, population.length);
-        System.arraycopy(children, 0, combined, population.length, children.length);
-        evaluate(combined);
-        population = selectTopN(populationSize, combined);
+        // 2) mate parents
+        Individual[] children = listCrossover.combinelist(parents, crossover);
+        System.out.println("n children: "+children.length);
 
-
-//        for (int i = 0; i < numChildren; i++) {
-//            evaluateIndividual(children[i]);
-//            //Replace the person who has lost in the tournament with the child
-//            int indexDying = tournamentDying();
-//            if(population[indexDying].getFitness() < children[i].getFitness()) {
-//                population[indexDying] = children[i];
-//            }
-//        }
-
-        // Evaluate population
-        double best = evaluate();
-        if (best > this.best) {
-            this.best = best;
-            this.noChangeCounter = 0;
-        } else {
-            this.noChangeCounter++;
+        // 3) mutate children
+        for(int i=0; i<children.length; i++){
+            children[i].mutate(mutationRate);
         }
-        System.out.println(best +" "+ averageFitness());
 
-        if (multimodal) {
-            sharedFitness();
+        // 4) Evaluate entire children
+        evaluate(children);
+
+        // 5) select top n to make new population
+        if( selectTopN(populationSize, children)!=null) {
+            population = selectTopN(populationSize, children);
+        }else{
+            System.out.println();
         }
+
     }
 
     private Individual[] getParents(int numParents) {
@@ -65,13 +52,18 @@ class Population extends BasePopulation {
     }
 
     private Individual[] selectTopN(int n, Individual[] selectFrom){
-        if(n < selectFrom.length) {
-            Arrays.sort(selectFrom);
-            Individual[] selected = Arrays.copyOfRange(selectFrom, 0, n);
-            return selected;
-        }else{
-            return null;
+        try {
+            if (n < selectFrom.length) {
+                Arrays.sort(selectFrom);
+                Individual[] selected = Arrays.copyOfRange(selectFrom, 0, n);
+                return selected;
+            } else {
+                return null;
+            }
+        }catch (Exception e){
+            System.out.println(e);
         }
+        return null;
     }
 
     private Individual[] tournamentParents(int numParents) {
