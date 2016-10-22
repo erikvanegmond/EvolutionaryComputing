@@ -4,6 +4,8 @@ import java.util.*;
 
 abstract class BasePopulation implements Iterator<Individual>{
 
+    public Selector selector = new SelectTopN();
+
     Individual[] population;
     ContestEvaluation evaluation_;
     public int populationSize;
@@ -52,15 +54,6 @@ abstract class BasePopulation implements Iterator<Individual>{
 
     public void setNoChangeCounter(int noChangeCounter) {
         this.noChangeCounter = noChangeCounter;
-    }
-
-    public static List<Integer> range(int min, int max) {
-        List<Integer> list = new LinkedList<Integer>();
-        for (int i = min; i <= max; i++) {
-            list.add(i);
-        }
-
-        return list;
     }
 
     public boolean isMultimodal() {
@@ -186,6 +179,12 @@ abstract class BasePopulation implements Iterator<Individual>{
             double sharedFitness = individual.getFitness()/sumShared;
             individual.setSharedFitness(sharedFitness);
         }
+    }
+
+    public Individual[] getParents(int numParents) {
+//        Individual[] parents = tournamentParents(numParents);
+        Individual[] parents = selector.select(numParents, population);
+        return parents;
     }
 
     abstract void newGeneration();

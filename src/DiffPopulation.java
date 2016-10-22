@@ -108,6 +108,15 @@ class DiffPopulation extends BasePopulation{
         return childGenome;
     }
 
+    private List<Integer> range(int min, int max) {
+        List<Integer> list = new LinkedList<Integer>();
+        for (int i = min; i <= max; i++) {
+            list.add(i);
+        }
+
+        return list;
+    }
+
 }
 
 

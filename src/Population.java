@@ -7,6 +7,8 @@ class Population extends BasePopulation {
     private int tounamentSampleSize = 18;
     private Crossover crossover = new RandomBlendCrossover();
     private ListCrossover listCrossover = new AllWithAllCrossover();
+    private Selector selector = new SelectTopN();
+    private Mutator mutator = new NonUniformMutation();
 
     public Population(int populationSize, int evaluations_limit_, ContestEvaluation evaluation) {
         super(populationSize, evaluations_limit_, evaluation);
@@ -30,87 +32,21 @@ class Population extends BasePopulation {
 
         // 3) mutate children
         for(int i=0; i<children.length; i++){
-            children[i].mutate(mutationRate);
+            mutator.mutate(children[i]);
         }
 
         // 4) Evaluate entire children
         evaluate(children);
 
         // 5) select top n to make new population
-        if( selectTopN(populationSize, children)!=null) {
-            population = selectTopN(populationSize, children);
+        if( selector.select(populationSize, children)!=null) {
+            population = selector.select(populationSize, children);
         }else{
             System.out.println();
         }
 
     }
 
-    private Individual[] getParents(int numParents) {
-//        Individual[] parents = tournamentParents(numParents);
-        Individual[] parents = selectTopN(numParents, population);
-        return parents;
-    }
-
-    private Individual[] selectTopN(int n, Individual[] selectFrom){
-        try {
-            if (n < selectFrom.length) {
-                Arrays.sort(selectFrom);
-                Individual[] selected = Arrays.copyOfRange(selectFrom, 0, n);
-                return selected;
-            } else {
-                return null;
-            }
-        }catch (Exception e){
-            System.out.println(e);
-        }
-        return null;
-    }
-
-    private Individual[] tournamentParents(int numParents) {
-        // tournament selection: to select one individual, T (in this case tournamentSampleSize) individuals are uniformly
-        // chosen, and the best of these T is returned (from the paper Evolutionary Computing by mr Eiben)
-        double initialFitness = -Double.MAX_VALUE;
-        Individual[] parents = new Individual[numParents];
-
-        // Find the index for the first parent
-        List<Integer> populationRange = range(0, populationSize - 1);
-
-        for (int i = 0; i < numParents; i++) {
-            List<Integer> sample1 = sample(populationRange);
-            int parentIndex1 = selectIndividualForTournament(sample1, "best", initialFitness);
-            parents[i] = population[parentIndex1];
-
-            // Remove first parent from list of possibilities
-//            Collections.sort(populationRange);
-//            populationRange.remove(parentIndex1);
-        }
-//        // Find the index for the second parent
-//        List<Integer> sample2 = sample(populationRange);
-//        int parentIndex2 = selectIndividualForTournament(sample2, "best", initialFitness);
-
-//                {population[parentIndex1], population[parentIndex2]};
-        return parents;
-    }
-
-    private int tournamentDying() {
-        // tournament selection: to select one individual, T (in this case tournamentSampleSize) individuals are uniformly
-        // chosen, and the best of these T is returned (from the paper Evolutionary Computing by mr Eiben)
-
-        double initialFitness = Double.MAX_VALUE;
-
-        // Find the index for the one who will be dying
-        List<Integer> populationRange = range(0, populationSize - 1);
-        List<Integer> sample1 = sample(populationRange);
-        int dyingIndex = selectIndividualForTournament(sample1, "worst", initialFitness);
-
-        return dyingIndex;
-    }
-
-    private List<Integer> sample(List<Integer> listForSample) {
-        Collections.shuffle(listForSample);
-        List<Integer> sample = listForSample.subList(0, tounamentSampleSize);
-        return sample;
-    }
 
     private double averageFitness(){
         double sum = 0;
@@ -119,37 +55,6 @@ class Population extends BasePopulation {
             sum += individual.getFitness();
         }
         return sum/populationSize;
-    }
-
-    private int selectIndividualForTournament(List<Integer> indexSample, String tournamentType, double fitnessBestFit) {
-        int individualIndex = -1;
-        for (int indexCounter = 0; indexCounter < tounamentSampleSize; indexCounter++) {
-            int indexFromSample = indexSample.get(indexCounter);
-            double individualFitness;
-            if (multimodal) {
-                individualFitness = population[indexFromSample].getSharedFitness();
-            } else {
-                individualFitness = population[indexFromSample].getFitness();
-            }
-            if (tournamentType.equals("best")) {
-                if (individualFitness > fitnessBestFit) {
-                    fitnessBestFit = individualFitness;
-                    individualIndex = indexFromSample;
-                } else {
-                    continue;
-                }
-            } else if (tournamentType.equals("worst")) {
-                if (individualFitness < fitnessBestFit) {
-                    fitnessBestFit = individualFitness;
-                    individualIndex = indexFromSample;
-                } else {
-                    continue;
-                }
-            } else {
-                System.out.println("not a known tournamentType");
-            }
-        }
-        return individualIndex;
     }
 
     private Individual[] generateOffspring(Individual[] parents) {
@@ -163,7 +68,7 @@ class Population extends BasePopulation {
         Individual[] children = listCrossover.combinelist(parents, crossover);
 
         for(int i=0; i<children.length; i++){
-            children[i].mutate(mutationRate);
+            mutator.mutate(children[i]);
         }
 
         return children;

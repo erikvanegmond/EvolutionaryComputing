@@ -90,19 +90,15 @@ public class Individual implements Comparable<Individual>{
         return (int) (otherFitness - getFitness());
     }
 
-    public void mutate(double mutationRate){
-        String mutation = "nonuniformMutation";
-        switch (mutation){
-            case "nonuniformMutation":
-                nonuniformMutation(mutationRate);
-            case "uniformMutation":
-                uniformMutation();
-            case "correlatedMutation":
-                correlatedMutation();
-            break;
-        }
-
-    }
+//    public void mutate(double mutationRate){
+//        String mutation = "nonuniformMutation";
+//        switch (mutation){
+//            case "nonuniformMutation":
+//                nonuniformMutation(mutationRate);
+//            break;
+//        }
+//
+//    }
 
     private double[][] covarianceMatrix(){
         double[][] cArray = new double[this.sigmas.length][this.sigmas.length];
@@ -145,34 +141,6 @@ public class Individual implements Comparable<Individual>{
 //        ArrayRealVector genomeVector = new ArrayRealVector(genome);
 //        genomeVector.add(new ArrayRealVector(multivariateDistribution.sample()));
 //        genome = genomeVector.toArray();
-    }
-
-    public void nonuniformMutation(double sigma) {
-        final double mutationChance = 1;
-        Random rand = new Random();
-        for(int i=0; i < genome.length; i++){
-            if (rand.nextDouble() < mutationChance){
-                genome[i] += rand.nextGaussian()*sigma;
-                //Stay within the search range.
-                if(genome[i] < min){
-                    genome[i] = min;
-                }else if(genome[i] > max){
-                    genome[i] = max;
-                }
-
-            }
-        }
-    }
-
-    public void uniformMutation(){
-    // can be used to get out of a local optimum
-        final double mutationChance = 0.3;
-        Random rand = new Random();
-        for(int i=0; i < genome.length; i++){
-            if (rand.nextDouble() < mutationChance){
-                genome[i] += newAllele();
-            }
-        }
     }
 
     public double distance(Individual other){
