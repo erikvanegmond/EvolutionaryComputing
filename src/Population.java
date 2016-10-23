@@ -12,7 +12,7 @@ class Population implements Iterator<Individual>{
 
     private Crossover crossover = new UniformCrossover();
     private ListCrossover listCrossover = new AllWithAllCrossover();
-    private Selector selector = new TournamentSelection();
+    private Selector selector = new selectTopN();
     private Mutator mutator = new NonUniformMutation();
 
     public double getMutationRate() {
@@ -150,6 +150,7 @@ class Population implements Iterator<Individual>{
 
     public boolean canEvaluate() {
         if (evals < evaluations_limit_) {
+            System.out.println("evals and evallimit: " + evals + " " + evaluations_limit_);
             return true;
         }
         return false;
@@ -205,8 +206,7 @@ class Population implements Iterator<Individual>{
 //        }
 
         Individual[] combined = (Individual[]) Utils.mergeIndividualLists(population, children);
-        population = selector.select(100, combined);
-        System.out.println(population.length);
+        population = selector.select(populationSize, combined);
         // Evaluate population
         double best = evaluate();
         if(best > this.best){

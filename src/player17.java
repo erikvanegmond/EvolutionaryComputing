@@ -67,7 +67,7 @@ public class player17 implements ContestSubmission
 
         int c = 0;
         while(pop.canEvaluate()){
-            System.out.println(c);
+//            System.out.println(c);
             if(pop.getNoChangeCounter() > 10){
                 pop.setMutationRate(pop.getMutationRate()*1.01);
                 pop.setNoChangeCounter(9);
