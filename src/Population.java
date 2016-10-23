@@ -12,7 +12,7 @@ class Population implements Iterator<Individual>{
 
     private Crossover crossover = new UniformCrossover();
     private ListCrossover listCrossover = new AllWithAllCrossover();
-    private Selector selector = new selectTopN();
+    private Selector selector = new SelectTopN();
     private Mutator mutator = new NonUniformMutation();
 
     public double getMutationRate() {
@@ -126,15 +126,27 @@ class Population implements Iterator<Individual>{
         resetIndex();
         while (hasNext()) {
             Individual individual = next();
-            Double fitness = -Double.MAX_VALUE;
+            Double fitness;
             fitness = evaluateIndividual(individual);
             if (fitness > maxFitness) {
                 maxFitness = fitness;
-//                bestIndividual = individual;
             }
             individual.setFitness(fitness);
         }
         return maxFitness;
+    }
+
+    public double evaluate(Individual[] list) {
+        double maxFitness = Integer.MIN_VALUE;
+        Double fitness;
+        for(Individual i: list){
+            fitness = evaluateIndividual(i);
+            if (fitness > maxFitness) {
+                maxFitness = fitness;
+            }
+       }
+       return maxFitness;
+
     }
 
     public double evaluateIndividual(Individual individual){
@@ -150,7 +162,6 @@ class Population implements Iterator<Individual>{
 
     public boolean canEvaluate() {
         if (evals < evaluations_limit_) {
-            System.out.println("evals and evallimit: " + evals + " " + evaluations_limit_);
             return true;
         }
         return false;
@@ -206,9 +217,9 @@ class Population implements Iterator<Individual>{
 //        }
 
         Individual[] combined = (Individual[]) Utils.mergeIndividualLists(population, children);
-        population = selector.select(populationSize, combined);
         // Evaluate population
-        double best = evaluate();
+        double best = evaluate(combined);
+        population = selector.select(populationSize, combined);
         if(best > this.best){
             this.best = best;
             this.noChangeCounter = 0;
