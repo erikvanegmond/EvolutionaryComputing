@@ -11,14 +11,24 @@ public class TournamentSelection implements Selector{
 
         double initialFitness = -Double.MAX_VALUE;
         Individual[] parents = new Individual[n];
+        try {
+            Arrays.sort(selectFrom);
+        }catch (Exception e){
+
+        }
+        parents[0] = selectFrom[0];
         int populationSize = selectFrom.length;
 
         // Find the index for the first parent
         List<Integer> populationRange = range(0, populationSize - 1);
 
-        for (int i = 0; i < n; i++) {
+        for (int i = 1; i < n; i++) {
             List<Integer> sample1 = sample(populationRange);
             int parentIndex = selectIndividualForTournament(sample1, initialFitness, selectFrom);
+            populationRange.remove((Integer) parentIndex);
+            if(parentIndex > selectFrom.length || parentIndex < 0){
+                System.out.println("this aint gonna work");
+            }
             parents[i] = selectFrom[parentIndex];
         }
         return parents;
@@ -36,6 +46,9 @@ public class TournamentSelection implements Selector{
             } else {
                 continue;
             }
+        }
+        if (individualIndex < 0){
+            return indexSample.get(0);
         }
         return individualIndex;
     }

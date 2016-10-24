@@ -12,8 +12,8 @@ class Population implements Iterator<Individual>{
 
     private Crossover crossover = new UniformCrossover();
     private ListCrossover listCrossover = new AllWithAllCrossover();
-    private Selector selector = new SelectTopN();
-    private Mutator mutator = new NonUniformMutation();
+    private Selector selector = new TournamentSelection();
+    private Mutator mutator = new NonUniformMutation(0.001);
 
     public double getMutationRate() {
         return mutationRate;
@@ -28,7 +28,6 @@ class Population implements Iterator<Individual>{
     private int index = 0;
     private int tounamentSampleSize = 18;
     private boolean multimodal = false;
-    private String parentSelector = "best";
     private String typeCrossOver = "blend";
     private double alphaBlend = 0.4;
     private int noChangeCounter = 0;
@@ -203,12 +202,15 @@ class Population implements Iterator<Individual>{
 
 
 
-        for(int i=0; i< num_children; i++) {
-            // Select parents
-            Individual[] parents = getParents(2);
-            // Apply crossover / mutation operators -> Create offspring
-            children[i] = generateOffspring(parents);
-        }
+//        for(int i=0; i< num_children; i++) {
+//            // Select parents
+//            Individual[] parents = getParents(2);
+//            // Apply crossover / mutation operators -> Create offspring
+//            children[i] = generateOffspring(parents);
+//        }
+
+        Individual[] parents = selector.select(50, population);
+        Individual[] childs = listCrossover.combinelist(parents,crossover);
 //        for(int i=0; i< num_children; i++) {
 //            evaluateIndividual(children[i]);
 //            //Replace the person who has lost in the tournament with the child
@@ -216,7 +218,7 @@ class Population implements Iterator<Individual>{
 //            population[indexDying] = children[i];
 //        }
 
-        Individual[] combined = (Individual[]) Utils.mergeIndividualLists(population, children);
+        Individual[] combined = Utils.mergeIndividualLists(parents, childs);
         // Evaluate population
         double best = evaluate(combined);
         population = selector.select(populationSize, combined);
