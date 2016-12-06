@@ -3,7 +3,7 @@ import java.util.Random;
 /**
  * Created by erikv on 20-10-2016.
  */
-public class RandomBlendCrossover implements Crossover {
+public class CrossoverRandomBlend implements Crossover {
     @Override
     public Individual combine(Individual[] parents) {
         int nParents = parents.length;

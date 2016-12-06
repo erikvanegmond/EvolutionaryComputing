@@ -3,7 +3,7 @@ import java.util.Random;
 /**
  * Created by erikv on 20-10-2016.
  */
-public class BlendCrossOver implements Crossover {
+public class CrossOverBlend implements Crossover {
     double alphaBlend = 0.4;
 
     @Override

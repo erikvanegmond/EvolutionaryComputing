@@ -51,7 +51,6 @@ public class player17 implements ContestSubmission
         pop.evaluate();
         if(isMultimodal){
             pop.setMultimodal(isMultimodal);
-            pop.sharedFitness();
         }
 
         while(pop.canEvaluate()){

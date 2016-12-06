@@ -3,7 +3,7 @@ import java.util.ArrayList;
 /**
  * Created by erikv on 20-10-2016.
  */
-public class AllWithAllCrossover implements ListCrossover {
+public class CrossoverListAllWithAll implements CrossoverList {
 
     @Override
     public Individual[] combinelist(Individual[] list, Crossover crossover) {

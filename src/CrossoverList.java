@@ -1,6 +1,6 @@
 /**
  * Created by erikv on 20-10-2016.
  */
-public interface ListCrossover {
+public interface CrossoverList {
     public Individual[] combinelist(Individual[] lists, Crossover crossover);
 }

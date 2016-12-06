@@ -1,6 +1,6 @@
 import java.util.*;
 
-public class TournamentSelection implements Selector{
+public class SelectTournament implements Selector{
 
     private int tournamentSampleSize = 18;
 
