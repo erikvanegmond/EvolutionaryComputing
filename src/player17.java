@@ -22,14 +22,12 @@ public class player17 implements ContestSubmission
         rnd_ = new Random();
     }
 
-    public void setSeed(long seed)
-    {
+    public void setSeed(long seed){
         // Set seed of algortihms random process
         rnd_.setSeed(seed);
     }
 
-    public void setEvaluation(ContestEvaluation evaluation)
-    {
+    public void setEvaluation(ContestEvaluation evaluation){
         // Set evaluation problem used in the run
         evaluation_ = evaluation;
 
@@ -47,17 +45,8 @@ public class player17 implements ContestSubmission
     }
 
     public void run() {
-//        Population pop =  new Population(population_limit, evaluations_limit_, evaluation_);;
-//        pop.evaluate();
-//
-//        while(pop.canEvaluate()){
-//            pop.newGeneration();
-//        }
-
         // init population
         Population pop = new Population(population_limit, evaluations_limit_, evaluation_);
-
-
         //evaluate entire population
         pop.evaluate();
         if(isMultimodal){
@@ -65,18 +54,8 @@ public class player17 implements ContestSubmission
             pop.sharedFitness();
         }
 
-        int c = 0;
         while(pop.canEvaluate()){
-//            System.out.println(c);
-            if(pop.getNoChangeCounter() > 10){
-                pop.setMutationRate(pop.getMutationRate()*1.01);
-                pop.setNoChangeCounter(9);
-            }
-            if(pop.getNoChangeCounter() < 2){
-                pop.setMutationRate(1);
-            }
             pop.newGeneration();
-            c++;
         }
     }
 

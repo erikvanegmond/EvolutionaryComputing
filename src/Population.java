@@ -12,12 +12,7 @@ class Population implements Iterator<Individual> {
     private double mutationRate = 1;
     private int evals = 0;
     private int index = 0;
-    private int tounamentSampleSize = 18;
     private boolean multimodal = false;
-    private String typeCrossOver = "blend";
-    private double alphaBlend = 0.4;
-    private int noChangeCounter = 0;
-    private double best = -Double.MAX_VALUE;
 
     private Crossover crossover = new UniformCrossover();
     private ListCrossover listCrossover = new AllWithAllCrossover();
@@ -49,14 +44,6 @@ class Population implements Iterator<Individual> {
 
     public void setEvals(int evals) {
         this.evals = evals;
-    }
-
-    public int getNoChangeCounter() {
-        return noChangeCounter;
-    }
-
-    public void setNoChangeCounter(int noChangeCounter) {
-        this.noChangeCounter = noChangeCounter;
     }
 
     public boolean isMultimodal() {
@@ -179,20 +166,9 @@ class Population implements Iterator<Individual> {
         Individual[] childs = listCrossover.combinelist(parents, crossover);
         Individual[] combined = Utils.mergeIndividualLists(parents, childs);
         // Evaluate population
-        double best = evaluate(combined);
+        evaluate(combined);
         population = selector.select(populationSize, combined);
-        if (best > this.best) {
-            this.best = best;
-            this.noChangeCounter = 0;
-        } else {
-            this.noChangeCounter++;
-        }
-        System.out.println(best + " " + this.noChangeCounter);
-
-        if (multimodal) {
-            sharedFitness();
-        }
-    }
+     }
 
 }
 
