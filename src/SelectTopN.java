@@ -11,7 +11,7 @@ public class SelectTopN implements Selector{
             try {
                 Arrays.sort(selectFrom);
             }catch (Exception e) {
-                System.out.println("Ignoring error!!!!");
+//                System.out.println("Ignoring error!!!!");
             }
             Individual[] selected = Arrays.copyOfRange(selectFrom, 0, n);
             return selected;
