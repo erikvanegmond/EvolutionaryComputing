@@ -12,9 +12,9 @@ class Population implements Iterator<Individual> {
     private int evals = 0;
     private int index = 0;
     private boolean multimodal = false;
-    private Crossover crossover = new UniformCrossover();
+    private Crossover crossover = new CrossoverRandomBlend();
     private CrossoverList crossoverList = new CrossoverListAllWithAll();
-    private Selector selector = new SelectTournament();
+    private Selector selector = new SelectTopN();//SelectTournament();
     private Mutator mutator = new NonUniformMutation(0.005);
     private ListMutation listMutation = new ListMutation();
 
@@ -85,6 +85,24 @@ class Population implements Iterator<Individual> {
             }
         }
         return individual.getFitness();
+    }
+
+    public void changePopulationLimit(int newPopulationSize){
+        Individual[] newPopulation;
+        if(newPopulationSize < populationSize){
+            newPopulation = selector.select(newPopulationSize, population);
+        }else{
+            newPopulation = new Individual[newPopulationSize];
+            for (int individuCounter = 0; individuCounter < newPopulationSize; individuCounter++) {
+                if(individuCounter<newPopulationSize) {
+                    newPopulation[individuCounter] = this.population[individuCounter];
+                }else{
+                    newPopulation[individuCounter] = new Individual(genomeSize);
+                }
+            }
+        }
+        this.population = newPopulation;
+        this.populationSize = newPopulationSize;
     }
 
     public boolean canEvaluate() {

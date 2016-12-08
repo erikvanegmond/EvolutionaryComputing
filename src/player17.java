@@ -46,9 +46,11 @@ public class player17 implements ContestSubmission
 
     public void run() {
         // init population
-        Population pop = new Population(population_limit, evaluations_limit_, evaluation_);
+        int initPopulationSize = (int) Math.floor( (evaluations_limit_*0.1) );
+        Population pop = new Population(initPopulationSize, evaluations_limit_, evaluation_);
         //evaluate entire population
         pop.evaluate();
+        pop.changePopulationLimit(population_limit);
         if(isMultimodal){
             pop.setMultimodal(isMultimodal);
         }
