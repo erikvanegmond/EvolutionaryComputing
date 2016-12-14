@@ -13,30 +13,74 @@ import java.util.List;
 public class test {
 
     public static void main(String[] args) throws ClassNotFoundException {
-        player17 sub = new player17();
         int numTests = 10;
 
-        List<ContestEvaluation> evaluators = new ArrayList<ContestEvaluation>();
-        evaluators.add(new SphereEvaluation());
-        runTest(evaluators, numTests, sub);
+        List<List<ContestEvaluation>> listOvEvaluators = new ArrayList<>();
+        List<ContestEvaluation> evaluators = new ArrayList<>();
+        for(int i=0; i<numTests; i++) {
+            evaluators.add(new SphereEvaluation());
+        }
+        listOvEvaluators.add(evaluators);
+        evaluators = new ArrayList<>();
+        for(int i=0; i<numTests; i++) {
+            evaluators.add(new RastriginEvaluation());
+        }
+        listOvEvaluators.add(evaluators);
+        evaluators = new ArrayList<>();
+        for(int i=0; i<numTests; i++) {
+            evaluators.add(new FletcherPowellEvaluation());
+        }
+        listOvEvaluators.add(evaluators);
+        evaluators = new ArrayList<>();
+        for(int i=0; i<numTests; i++) {
+            evaluators.add(new DeceptiveEvaluation());
+        }
+        listOvEvaluators.add(evaluators);
+        evaluators = new ArrayList<>();
+        for(int i=0; i<numTests; i++) {
+            evaluators.add(new CrossInTrayEvaluation());
+        }
+        listOvEvaluators.add(evaluators);
+        evaluators = new ArrayList<>();
+        for(int i=0; i<numTests; i++) {
+            evaluators.add(new AckleyEvaluation());
+        }
+        listOvEvaluators.add(evaluators);
+        evaluators = new ArrayList<>();
+        for(int i=0; i<numTests; i++) {
+            evaluators.add(new GriewankEvaluation());
+        }
+        listOvEvaluators.add(evaluators);
+        evaluators = new ArrayList<>();
+        for(int i=0; i<numTests; i++) {
+            evaluators.add(new SchwefelEvaluation());
+        }
+        listOvEvaluators.add(evaluators);
+        evaluators = new ArrayList<>();
+        for(int i=0; i<numTests; i++) {
+            evaluators.add(new LangermanEvaluation());
+        }
+        listOvEvaluators.add(evaluators);
+
+        runTest(listOvEvaluators, numTests);
 
     }
 
-    public static void runTest(List<ContestEvaluation> evaluators, int numTests, player17 sub){
-        for (ContestEvaluation eval:evaluators) {
+    public static void runTest(List<List<ContestEvaluation>> listOvEvaluators, int numTests){
+
+        for(List<ContestEvaluation> evaluators:listOvEvaluators) {
             StringBuilder string = new StringBuilder();
-            string.append("shpere");
-            for(int i=0; i<numTests; i++){
-                evaluators.get(0).getClass();
-                sub.setEvaluation(new SphereEvaluation());
+            string.append(evaluators.get(0).getClass());
+            System.out.println(string.toString());
+            for (ContestEvaluation eval : evaluators) {
+                player17 sub = new player17();
+                sub.setEvaluation(eval);
                 sub.run();
-                System.out.println(sub.getScore());
                 string.append(",");
                 string.append(sub.getScore());
             }
             string.append("\n");
             writeToFile(string.toString());
-
         }
     }
 
