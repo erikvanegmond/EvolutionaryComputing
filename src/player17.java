@@ -16,6 +16,11 @@ public class player17 implements ContestSubmission
     private boolean hasStructure;
     private boolean isSeparable;
 
+    private double score;
+
+    public double getScore(){
+        return score;
+    }
 
     public player17()
     {
@@ -58,6 +63,8 @@ public class player17 implements ContestSubmission
         while(pop.canEvaluate()){
             pop.newGeneration();
         }
+        score = evaluation_.getFinalResult();
+
     }
 
 
